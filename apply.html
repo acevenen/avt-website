@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Apply — Ace Venen Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--black:#0a0a0a;--white:#ffffff;--gold:#e8b84b;--muted:#888;--border:rgba(255,255,255,0.08);--card:#111;--input:#0f0f0f}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+
+nav{padding:28px 24px;text-align:center;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;max-width:680px;margin:0 auto;width:100%}
+.nav-logo{font-size:.75rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;text-decoration:none}
+.nav-back{font-size:.72rem;color:var(--muted);text-decoration:none;transition:color .2s;letter-spacing:.05em}
+.nav-back:hover{color:var(--gold)}
+
+main{flex:1;max-width:480px;margin:0 auto;width:100%;padding:64px 24px 80px}
+
+.page-tag{font-size:.68rem;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+h1{font-size:clamp(2rem,8vw,3rem);font-weight:700;line-height:1.15;letter-spacing:-.02em;margin-bottom:12px}
+h1 .italic{font-family:'Playfair Display',serif;font-style:italic;color:var(--gold)}
+.page-sub{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:48px}
+.page-sub strong{color:var(--white)}
+
+.form{display:flex;flex-direction:column;gap:18px}
+.fgroup{display:flex;flex-direction:column;gap:8px}
+.flabel{font-size:.65rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;font-weight:500}
+.finput,.fselect{background:var(--input);border:1px solid var(--border);color:var(--white);font-family:'Inter',sans-serif;font-size:.95rem;padding:15px 18px;outline:none;transition:border-color .2s;width:100%;border-radius:6px;-webkit-appearance:none}
+.finput:focus,.fselect:focus{border-color:rgba(232,184,75,.5)}
+.finput::placeholder{color:#333}
+.fselect{cursor:pointer}
+.fselect option{background:#111}
+.select-wrap{position:relative}
+.select-wrap::after{content:'▾';position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--gold);pointer-events:none;font-size:.85rem}
+
+.submit-btn{background:var(--gold);color:#000;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;padding:18px;border:none;cursor:pointer;border-radius:100px;transition:all .22s;margin-top:8px;width:100%;letter-spacing:.02em}
+.submit-btn:hover{background:#f0c85a;transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,184,75,.22)}
+
+.form-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7}
+
+/* SUCCESS */
+#success{display:none;text-align:center;padding:48px 0}
+.success-check{width:64px;height:64px;background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:1.5rem}
+#success h2{font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:12px}
+#success p{font-size:.9rem;color:var(--muted);line-height:1.8}
+#success p strong{color:var(--white)}
+.back-link{display:inline-block;margin-top:32px;font-size:.75rem;color:var(--muted);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:2px;transition:color .2s}
+.back-link:hover{color:var(--gold)}
+
+footer{border-top:1px solid var(--border);padding:24px;text-align:center}
+.foot-copy{font-size:.65rem;color:var(--muted);letter-spacing:.1em}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Ace Venen Trading</a>
+  <a href="index.html" class="nav-back">← Back</a>
+</nav>
+
+<main>
+  <div id="form-wrap">
+    <div class="page-tag">Application</div>
+    <h1>Let's Get <span class="italic">To Work.</span></h1>
+    <p class="page-sub">Spots are limited. Ace reviews every application personally. You'll hear back <strong>within 24 hours.</strong></p>
+
+    <div class="form" id="applyForm">
+      <div class="fgroup">
+        <label class="flabel">Full Name</label>
+        <input class="finput" id="name" type="text" placeholder="Your full name"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Email Address</label>
+        <input class="finput" id="email" type="email" placeholder="your@email.com"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Phone Number</label>
+        <input class="finput" id="phone" type="tel" placeholder="+1 (000) 000-0000"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Trading Experience</label>
+        <div class="select-wrap">
+          <select class="fselect" id="experience">
+            <option value="" disabled selected>Select your level</option>
+            <option value="chud">Chud — No experience at all</option>
+            <option value="noob">Noob — 1 to 3 years</option>
+            <option value="pro">Pro — 5+ years</option>
+          </select>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="submitForm()">Submit Application</button>
+      <p class="form-note">No spam. Your info stays private.<br>Ace reads every application himself.</p>
+    </div>
+  </div>
+
+  <div id="success">
+    <div class="success-check">✓</div>
+    <h2>Application Received</h2>
+    <p>Ace will reach out to <strong id="confEmail"></strong><br>within 24 hours. Stay ready.</p>
+    <a href="index.html" class="back-link">← Back to home</a>
+  </div>
+</main>
+
+<footer>
+  <p class="foot-copy">© 2026 Ace Venen Trading. Trading involves substantial risk.</p>
+</footer>
+
+<script>
+function submitForm(){
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const exp=document.getElementById('experience').value;
+  if(!name||!email||!phone||!exp){alert('Please fill in all fields.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email.');return;}
+  document.getElementById('form-wrap').style.display='none';
+  document.getElementById('success').style.display='block';
+  document.getElementById('confEmail').textContent=email;
+}
+</script>
+</body>
+</html>
