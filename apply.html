@@ -39,6 +39,9 @@ h1 .italic{font-family:'Playfair Display',serif;font-style:italic;color:var(--go
 .submit-btn:hover{background:#f0c85a;transform:translateY(-2px);box-shadow:0 10px 32px rgba(232,184,75,.22)}
 
 .form-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:14px;line-height:1.7}
+.ferror{font-size:.68rem;color:#e05555;letter-spacing:.05em;margin-top:2px}
+.finput.invalid,.fselect.invalid{border-color:#e05555}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
 
 /* SUCCESS */
 #success{display:none;text-align:center;padding:48px 0}
@@ -66,33 +69,33 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center}
     <h1>Let's Get <span class="italic">To Work.</span></h1>
     <p class="page-sub">Spots are limited. Ace reviews every application personally. You'll hear back <strong>within 24 hours.</strong></p>
 
-    <div class="form" id="applyForm">
+    <form class="form" id="applyForm" novalidate onsubmit="submitForm(event)">
       <div class="fgroup">
-        <label class="flabel">Full Name</label>
-        <input class="finput" id="name" type="text" placeholder="Your full name"/>
+        <label class="flabel" for="name">Full Name</label>
+        <input class="finput" id="name" name="name" type="text" placeholder="Your full name" required/>
       </div>
       <div class="fgroup">
-        <label class="flabel">Email Address</label>
-        <input class="finput" id="email" type="email" placeholder="your@email.com"/>
+        <label class="flabel" for="email">Email Address</label>
+        <input class="finput" id="email" name="email" type="email" placeholder="your@email.com" required/>
       </div>
       <div class="fgroup">
-        <label class="flabel">Phone Number</label>
-        <input class="finput" id="phone" type="tel" placeholder="+1 (000) 000-0000"/>
+        <label class="flabel" for="phone">Phone Number</label>
+        <input class="finput" id="phone" name="phone" type="tel" placeholder="+1 (000) 000-0000" required/>
       </div>
       <div class="fgroup">
-        <label class="flabel">Trading Experience</label>
+        <label class="flabel" for="experience">Trading Experience</label>
         <div class="select-wrap">
-          <select class="fselect" id="experience">
+          <select class="fselect" id="experience" name="experience" required>
             <option value="" disabled selected>Select your level</option>
-            <option value="chud">Chud — No experience at all</option>
-            <option value="noob">Noob — 1 to 3 years</option>
-            <option value="pro">Pro — 5+ years</option>
+            <option value="Chud — No experience at all">Chud — No experience at all</option>
+            <option value="Noob — 1 to 3 years">Noob — 1 to 3 years</option>
+            <option value="Pro — 5+ years">Pro — 5+ years</option>
           </select>
         </div>
       </div>
-      <button class="submit-btn" onclick="submitForm()">Submit Application</button>
+      <button class="submit-btn" type="submit" id="submitBtn">Submit Application</button>
       <p class="form-note">No spam. Your info stays private.<br>Ace reads every application himself.</p>
-    </div>
+    </form>
   </div>
 
   <div id="success">
@@ -108,16 +111,70 @@ footer{border-top:1px solid var(--border);padding:24px;text-align:center}
 </footer>
 
 <script>
-function submitForm(){
+async function submitForm(e){
+  e.preventDefault();
+  clearErrors();
+
   const name=document.getElementById('name').value.trim();
   const email=document.getElementById('email').value.trim();
   const phone=document.getElementById('phone').value.trim();
   const exp=document.getElementById('experience').value;
-  if(!name||!email||!phone||!exp){alert('Please fill in all fields.');return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email.');return;}
-  document.getElementById('form-wrap').style.display='none';
-  document.getElementById('success').style.display='block';
-  document.getElementById('confEmail').textContent=email;
+
+  let valid=true;
+  if(!name){showError('name','Full name is required.');valid=false;}
+  if(!email){showError('email','Email address is required.');valid=false;}
+  else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError('email','Enter a valid email address.');valid=false;}
+  if(!phone){showError('phone','Phone number is required.');valid=false;}
+  else if(!/^[\d\s\+\-\(\)]{7,20}$/.test(phone)){showError('phone','Enter a valid phone number.');valid=false;}
+  if(!exp){showError('experience','Please select your experience level.');valid=false;}
+  if(!valid)return;
+
+  const btn=document.getElementById('submitBtn');
+  btn.textContent='Submitting…';
+  btn.disabled=true;
+
+  try{
+    const res=await fetch('https://formspree.io/f/xnjrljje',{
+      method:'POST',
+      headers:{'Accept':'application/json','Content-Type':'application/json'},
+      body:JSON.stringify({name,email,phone,experience:exp})
+    });
+    if(res.ok){
+      document.getElementById('form-wrap').style.display='none';
+      document.getElementById('success').style.display='block';
+      document.getElementById('confEmail').textContent=email;
+    }else{
+      const data=await res.json();
+      const msg=data.errors?data.errors.map(err=>err.message).join(' '):'Submission failed. Please try again.';
+      showBanner(msg);
+      btn.textContent='Submit Application';
+      btn.disabled=false;
+    }
+  }catch(err){
+    showBanner('Network error. Please check your connection and try again.');
+    btn.textContent='Submit Application';
+    btn.disabled=false;
+  }
+}
+
+function showError(id,msg){
+  const el=document.getElementById(id);
+  el.classList.add('invalid');
+  const span=document.createElement('span');
+  span.className='ferror';
+  span.textContent=msg;
+  el.closest('.fgroup').appendChild(span);
+}
+
+function clearErrors(){
+  document.querySelectorAll('.ferror').forEach(el=>el.remove());
+  document.querySelectorAll('.invalid').forEach(el=>el.classList.remove('invalid'));
+}
+
+function showBanner(msg){
+  let b=document.getElementById('formBanner');
+  if(!b){b=document.createElement('p');b.id='formBanner';b.className='ferror';b.style.textAlign='center';b.style.marginTop='4px';document.getElementById('applyForm').appendChild(b);}
+  b.textContent=msg;
 }
 </script>
 </body>
