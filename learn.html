@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVT — Free Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black: #080808;
+  --surface: #0f0f0f;
+  --surface2: #141414;
+  --white: #f0ede6;
+  --green: #1db87e;
+  --green-dim: #0d5c40;
+  --green-bg: #091a12;
+  --red: #c94a2a;
+  --red-bg: #1a0b07;
+  --gold: #d4a843;
+  --gold-bg: #1a1204;
+  --border: rgba(240,237,230,0.08);
+  --border-bright: rgba(240,237,230,0.15);
+  --muted: rgba(240,237,230,0.38);
+  --muted2: rgba(240,237,230,0.6);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 0.5px solid var(--border);
+}
+
+.nav-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-pill {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--green-bg);
+  color: var(--green);
+  border: 0.5px solid var(--green-dim);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.nav-cta {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: var(--green);
+  color: var(--black);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+/* HERO */
+.hero {
+  padding: 3rem 1.25rem 2rem;
+  border-bottom: 0.5px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(29,184,126,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--green);
+}
+
+.hero h1 {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--green);
+}
+
+.hero-sub {
+  font-size: 14px;
+  color: var(--muted2);
+  max-width: 380px;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+.proof-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--green-bg);
+  border: 0.5px solid var(--green-dim);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 1.5rem;
+}
+
+.proof-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.proof-body {}
+
+.proof-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 3px;
+}
+
+.proof-quote {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.hero-modules {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hero-mod {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.hero-mod-free {
+  background: var(--green-bg);
+  color: var(--green);
+  border: 0.5px solid var(--green-dim);
+}
+
+.hero-mod-locked {
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border: 0.5px solid var(--border);
+}
+
+/* MODULE */
+.module {
+  border-bottom: 0.5px solid var(--border);
+  animation: fadeUp 0.5s ease both;
+}
+
+.module:nth-child(1) { animation-delay: 0.1s; }
+.module:nth-child(2) { animation-delay: 0.2s; }
+.module:nth-child(3) { animation-delay: 0.3s; }
+
+.module-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.module-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.module-num-free {
+  background: var(--green-bg);
+  color: var(--green);
+  border: 0.5px solid var(--green-dim);
+}
+
+.module-num-partial {
+  background: var(--gold-bg);
+  color: var(--gold);
+  border: 0.5px solid rgba(212,168,67,0.3);
+}
+
+.module-meta { flex: 1; min-width: 0; }
+
+.module-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.module-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.module-title-free { color: var(--white); }
+.module-title-partial { color: var(--white); }
+
+.module-badge {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-free { background: var(--green-bg); color: var(--green); border: 0.5px solid var(--green-dim); }
+.badge-partial { background: var(--gold-bg); color: var(--gold); border: 0.5px solid rgba(212,168,67,0.3); }
+
+.module-body {
+  padding: 0 1.25rem 1.75rem;
+  display: none;
+}
+
+.module-body.open { display: block; }
+
+/* VIDEO PLACEHOLDER */
+.video-block {
+  background: var(--surface2);
+  border: 0.5px solid var(--border-bright);
+  border-radius: 10px;
+  aspect-ratio: 16/9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.video-block:hover { border-color: var(--green-dim); }
+
+.video-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(29,184,126,0.04) 0%, transparent 60%);
+}
+
+.video-play {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(29,184,126,0.15);
+  border: 1px solid var(--green-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.video-play::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 0 8px 14px;
+  border-color: transparent transparent transparent var(--green);
+  margin-left: 3px;
+}
+
+.video-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+/* LESSON CONTENT */
+.lesson-intro {
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+  font-weight: 400;
+}
+
+.lesson-section {
+  margin-bottom: 1.25rem;
+}
+
+.lesson-section-title {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 0.6rem;
+}
+
+.lesson-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lesson-list li {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+  font-weight: 400;
+}
+
+.lesson-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-size: 11px;
+}
+
+.callout {
+  border-left: 2px solid var(--green);
+  padding: 10px 14px;
+  background: var(--green-bg);
+  border-radius: 0 6px 6px 0;
+  margin: 1rem 0;
+}
+
+.callout-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+.callout p {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.rule-block {
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.rule-label {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.rule-value {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+
+.rule-value span { color: var(--green); }
+
+.rule-note {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.math-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 11px;
+}
+
+.math-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.math-table td {
+  padding: 7px 8px;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--muted2);
+  vertical-align: top;
+}
+
+.math-table td:first-child {
+  font-family: 'DM Mono', monospace;
+  color: var(--white);
+  font-size: 12px;
+}
+
+.math-table tr:last-child td { border-bottom: none; }
+
+/* PARTIAL LOCK */
+.lock-gate {
+  background: var(--red-bg);
+  border: 0.5px solid rgba(201,74,42,0.3);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.lock-gate-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+
+.lock-gate p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+.lock-gate a {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 6px;
+  background: var(--green);
+  color: var(--black);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+/* CANDLE EXPLAINER */
+.candle-row {
+  display: flex;
+  gap: 10px;
+  margin: 0.75rem 0;
+  flex-wrap: wrap;
+}
+
+.candle-card {
+  flex: 1;
+  min-width: 100px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.candle-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  margin-bottom: 6px;
+}
+
+.candle-body-bull {
+  width: 14px;
+  height: 28px;
+  background: var(--green);
+  border-radius: 2px;
+  position: relative;
+}
+
+.candle-body-bear {
+  width: 14px;
+  height: 28px;
+  background: var(--red);
+  border-radius: 2px;
+  position: relative;
+}
+
+.candle-wick {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.5px;
+}
+
+.candle-wick-top { background: rgba(240,237,230,0.4); height: 8px; top: -8px; }
+.candle-wick-bot { background: rgba(240,237,230,0.4); height: 8px; bottom: -8px; }
+
+.candle-label {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+/* CHECKLIST */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0.75rem 0;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+
+.check-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--green-dim);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.check-text {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+/* SECTION DIVIDER */
+.section-connector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1.25rem 1.25rem 0;
+}
+
+.section-connector-line {
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+.section-connector-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* CTA */
+.cta-block {
+  padding: 2rem 1.25rem;
+  text-align: center;
+}
+
+.cta-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.cta-headline {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+.cta-headline em {
+  font-style: normal;
+  color: var(--green);
+}
+
+.cta-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.cta-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  padding: 13px 20px;
+  border-radius: 8px;
+  background: var(--green);
+  color: var(--black);
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: opacity 0.15s;
+}
+
+.btn-primary:hover { opacity: 0.88; }
+
+.btn-secondary {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted2);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  border: 0.5px solid var(--border-bright);
+  transition: border-color 0.15s;
+}
+
+.btn-secondary:hover { border-color: var(--green-dim); color: var(--white); }
+
+footer {
+  padding: 1.25rem;
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.footer-right {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero { animation: fadeUp 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">AVT — Ace's Dojo</span>
+  <div class="nav-right">
+    <span class="nav-pill">free content</span>
+    <a href="https://discord.gg/hReBrtPFx" class="nav-cta" target="_blank">Join the Dojo →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="eyebrow">Trading Time for Money</p>
+  <h1>Learn the system.<br><em>Free.</em></h1>
+  <p class="hero-sub">Three foundational pillars. No fluff, no gatekeeping. This is what separates traders who survive from traders who blow up.</p>
+
+  <div class="proof-strip">
+    <div class="proof-icon">⬡</div>
+    <div class="proof-body">
+      <p class="proof-name">Emilio — first student</p>
+      <p class="proof-quote">Zero trading knowledge → consistent $300/day after one 90-minute session. That's what these pillars make possible.</p>
+    </div>
+  </div>
+
+  <div class="hero-modules">
+    <a href="#pillar1" class="hero-mod hero-mod-free">01 — Mindset</a>
+    <a href="#pillar2" class="hero-mod hero-mod-free">02 — The Rules</a>
+    <a href="#pillar3" class="hero-mod hero-mod-free">03 — Price Action ↗</a>
+    <span class="hero-mod hero-mod-locked">04–08 — The Strategy 🔒</span>
+  </div>
+</div>
+
+<!-- PILLAR 1 -->
+<div class="module" id="pillar1">
+  <div class="module-header" onclick="toggleModule('m1')">
+    <div class="module-num module-num-free">01</div>
+    <div class="module-meta">
+      <p class="module-eyebrow">Free — Full access</p>
+      <p class="module-title module-title-free">Mindset &amp; Emotional Discipline</p>
+    </div>
+    <span class="module-badge badge-free" id="m1-badge">open ↓</span>
+  </div>
+  <div class="module-body open" id="m1">
+    <div class="video-block">
+      <div class="video-play"></div>
+      <span class="video-label">Pillar 1 — Video lesson (add your Loom/YouTube link)</span>
+    </div>
+
+    <p class="lesson-intro">Most people don't fail trading because they couldn't find a setup. They fail because they couldn't handle the emotion of being wrong. Tilt, revenge trading, FOMO, ego — these kill funded accounts faster than any bad entry.</p>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">The four killers</p>
+      <ul class="lesson-list">
+        <li><strong>Tilt</strong> — Taking a loss badly and immediately re-entering without a setup. You're not trading anymore, you're reacting.</li>
+        <li><strong>Revenge trading</strong> — Doubling size after a loss to "get it back." The market doesn't owe you anything. You're now at 2x risk while emotional.</li>
+        <li><strong>FOMO</strong> — Entering late because a move is already in motion. You're chasing. Your entry is garbage and you know it.</li>
+        <li><strong>Overtrading</strong> — Taking 6 trades when your system only gave you 2 setups. More trades ≠ more money. It means more exposure to randomness.</li>
+      </ul>
+    </div>
+
+    <div class="callout">
+      <p class="callout-label">The real edge</p>
+      <p>Discipline is the strategy. A perfect setup executed badly is a loss. A mediocre setup executed with full discipline is often a win. Your job is to follow the rules, not outsmart the market.</p>
+    </div>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">How to build the habit</p>
+      <ul class="lesson-list">
+        <li>Set a daily loss limit and treat it like a circuit breaker — once hit, session over. No exceptions.</li>
+        <li>If you take two losses back to back, step away for 15 minutes minimum before re-entering.</li>
+        <li>Journal every trade. Not just the P&amp;L — how you felt before and after the entry. Patterns will emerge.</li>
+        <li>Ask after every trade: "Did I follow my rules?" Not "Did I make money?" A disciplined losing trade is still a win.</li>
+      </ul>
+    </div>
+
+    <div class="callout">
+      <p class="callout-label">Ace's rule</p>
+      <p>If I wouldn't take the trade fresh and fully calm, I don't take it. Emotional state is part of the entry criteria.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PILLAR 2 -->
+<div class="module" id="pillar2">
+  <div class="module-header" onclick="toggleModule('m2')">
+    <div class="module-num module-num-free">02</div>
+    <div class="module-meta">
+      <p class="module-eyebrow">Free — Full access</p>
+      <p class="module-title module-title-free">Foundational Rules</p>
+    </div>
+    <span class="module-badge badge-free" id="m2-badge">open ↓</span>
+  </div>
+  <div class="module-body open" id="m2">
+    <div class="video-block">
+      <div class="video-play"></div>
+      <span class="video-label">Pillar 2 — Video lesson (add your Loom/YouTube link)</span>
+    </div>
+
+    <p class="lesson-intro">This is the math before the chart. You can have the best setup in the world — if your risk management is broken, you will blow up. These are non-negotiables. Not guidelines. Not suggestions.</p>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">The non-negotiables</p>
+
+      <div class="rule-block">
+        <p class="rule-label">Instrument</p>
+        <p class="rule-value">NQ Futures <span>(Nasdaq 100)</span></p>
+        <p class="rule-note">Highly liquid. Predictable volatility. Clean technical structure. Don't add instruments until you've mastered one.</p>
+      </div>
+
+      <div class="rule-block">
+        <p class="rule-label">Session</p>
+        <p class="rule-value">NY Open <span>9:30–11:30 AM EST</span></p>
+        <p class="rule-note">Highest volume, cleanest moves. Outside this window the setup probability drops significantly.</p>
+      </div>
+
+      <div class="rule-block">
+        <p class="rule-label">Stop Loss</p>
+        <p class="rule-value">Always set <span>before</span> entry</p>
+        <p class="rule-note">No SL = no trade. This is the rule that keeps you in the game when you're wrong.</p>
+      </div>
+
+      <div class="rule-block">
+        <p class="rule-label">Risk / Reward</p>
+        <p class="rule-value"><span>2:1</span> minimum · <span>3:1</span> target</p>
+        <p class="rule-note">You can be wrong 40% of the time and still be profitable at 2:1. The math works for you, not against you.</p>
+      </div>
+
+      <div class="rule-block">
+        <p class="rule-label">Risk per trade</p>
+        <p class="rule-value"><span>1–2%</span> of account max</p>
+        <p class="rule-note">Prop firm accounts (Topstep, Lucid) typically have 2–4% daily loss limits. Stay well inside them.</p>
+      </div>
+    </div>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">The math — how it plays out</p>
+      <table class="math-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Trades</th>
+            <th>Win rate</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2:1 RR, average trader</td>
+            <td>10</td>
+            <td>50%</td>
+            <td style="color:var(--green)">+5R profit</td>
+          </tr>
+          <tr>
+            <td>2:1 RR, bad week</td>
+            <td>10</td>
+            <td>40%</td>
+            <td style="color:var(--green)">+2R profit</td>
+          </tr>
+          <tr>
+            <td>No RR, no system</td>
+            <td>10</td>
+            <td>60%</td>
+            <td style="color:var(--red)">−2R loss</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p class="callout-label">Why most people fail</p>
+      <p>They take 1:1 trades at best, let losers run and cut winners early. Even with a 60% win rate, the math kills them. Fix the ratio first. Everything else is secondary.</p>
+    </div>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">Before every trade — quick checklist</p>
+      <div class="checklist">
+        <div class="check-item"><div class="check-box"></div><span class="check-text">SL is placed and I know the exact dollar risk</span></div>
+        <div class="check-item"><div class="check-box"></div><span class="check-text">TP is at least 2x my SL distance</span></div>
+        <div class="check-item"><div class="check-box"></div><span class="check-text">I'm trading NQ during NY open hours</span></div>
+        <div class="check-item"><div class="check-box"></div><span class="check-text">This trade risks 2% of account or less</span></div>
+        <div class="check-item"><div class="check-box"></div><span class="check-text">I'm not in a revenge/FOMO state</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PILLAR 3 -->
+<div class="module" id="pillar3">
+  <div class="module-header" onclick="toggleModule('m3')">
+    <div class="module-num module-num-partial">03</div>
+    <div class="module-meta">
+      <p class="module-eyebrow">Free intro · Application is paid</p>
+      <p class="module-title module-title-partial">Reading Price Action</p>
+    </div>
+    <span class="module-badge badge-partial" id="m3-badge">open ↓</span>
+  </div>
+  <div class="module-body open" id="m3">
+    <div class="video-block">
+      <div class="video-play"></div>
+      <span class="video-label">Pillar 3 — Price action intro (add your Loom/YouTube link)</span>
+    </div>
+
+    <p class="lesson-intro">Before you can trade a setup, you need to speak the language of the chart. This is the vocabulary — what price is actually telling you, candle by candle.</p>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">Reading candles</p>
+      <div class="candle-row">
+        <div class="candle-card">
+          <div class="candle-visual">
+            <div class="candle-body-bull">
+              <div class="candle-wick candle-wick-top"></div>
+              <div class="candle-wick candle-wick-bot"></div>
+            </div>
+          </div>
+          <p class="candle-label">Bullish — closed higher than it opened. Buyers in control.</p>
+        </div>
+        <div class="candle-card">
+          <div class="candle-visual">
+            <div class="candle-body-bear">
+              <div class="candle-wick candle-wick-top"></div>
+              <div class="candle-wick candle-wick-bot"></div>
+            </div>
+          </div>
+          <p class="candle-label">Bearish — closed lower than it opened. Sellers in control.</p>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace;font-style:italic;">The wicks tell you where price was rejected. A long wick = failed attempt to push further. That rejection is information.</p>
+    </div>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">Market structure</p>
+      <ul class="lesson-list">
+        <li><strong>Higher Highs / Higher Lows (HH/HL)</strong> — Uptrend confirmed. Each pullback creates a higher low before pushing to a new high. Buy the dip.</li>
+        <li><strong>Lower Highs / Lower Lows (LH/LL)</strong> — Downtrend confirmed. Each bounce gets rejected lower. Short the bounce.</li>
+        <li><strong>Break of Structure (BoS)</strong> — When a swing high or low is taken out. This is often the start of a new move or a signal a reversal is forming.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-section">
+      <p class="lesson-section-title">Supply &amp; Demand zones</p>
+      <ul class="lesson-list">
+        <li>Supply zone (resistance) — Area where price moved down aggressively from. Sellers were there before, likely still there.</li>
+        <li>Demand zone (support) — Area where price moved up aggressively from. Buyers were there before, likely still there.</li>
+        <li>The more times a zone is tested and holds, the more significant it becomes. But too many tests = weakening zone.</li>
+      </ul>
+    </div>
+
+    <div class="lock-gate">
+      <p class="lock-gate-label">🔒 Paid — application continues here</p>
+      <p>You now understand the vocabulary. The next module teaches you how to apply it — daily bias, the 9/20 EMA setup, flag entries on the 5-minute chart. That's where the money is.</p>
+      <a href="https://discord.gg/hReBrtPFx" target="_blank">Join the Dojo to get access →</a>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-block">
+  <p class="cta-eyebrow">You've got the foundation</p>
+  <h2 class="cta-headline">Now learn the<br><em>actual setup.</em></h2>
+  <p class="cta-sub">The 9/20 EMA flag system. Daily bias to 5-minute entry. How to pass a funded account. Everything is inside the Dojo.</p>
+  <div class="cta-btns">
+    <a href="https://discord.gg/hReBrtPFx" class="btn-primary" target="_blank">Join Ace's Dojo — Free</a>
+    <a href="https://avt-website.vercel.app" class="btn-secondary" target="_blank">Learn more about AVT →</a>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo">AVT · ace.venen</span>
+  <span class="footer-right">© 2026</span>
+</footer>
+
+<script>
+function toggleModule(id) {
+  const body = document.getElementById(id);
+  const badge = document.getElementById(id + '-badge');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+
+  const isFree = badge.classList.contains('badge-free');
+  if (isOpen) {
+    badge.textContent = 'open ↓';
+    badge.style.opacity = '0.5';
+  } else {
+    badge.textContent = 'collapse ↑';
+    badge.style.opacity = '1';
+  }
+}
+
+// Default: all open, badges accurate
+document.querySelectorAll('.module-badge').forEach(b => {
+  b.textContent = 'collapse ↑';
+});
+</script>
+</body>
+</html>
