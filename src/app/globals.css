@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0B0B0C;
+  --card: #141416;
+  --paper: #EDEAE0;
+  --muted: #A6A29A;
+  --gold: #C9A227;
+}
+
+@theme inline {
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+  --font-display: var(--font-archivo);
+  --font-display--font-variation-settings: "wdth" 125;
+}
+
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-plex-sans), sans-serif;
+}
