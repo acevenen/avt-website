@@ -68,14 +68,14 @@ export default function ApplyPage() {
   const inputClass =
     "w-full rounded-md border border-white/10 bg-[var(--card)] px-4 py-3 text-[var(--paper)] placeholder:text-[var(--muted)]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]";
   const labelClass =
-    "font-mono text-xs uppercase tracking-widest text-[var(--muted)]";
+    "text-xs font-medium uppercase tracking-widest text-[var(--muted)]";
 
   return (
     <main className="mx-auto w-full max-w-md px-5 py-16">
       <nav className="mb-12 flex items-center justify-between">
         <Link
           href="/"
-          className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--muted)] hover:text-[var(--paper)]"
+          className="text-xs uppercase tracking-[0.3em] text-[var(--muted)] hover:text-[var(--paper)]"
         >
           Ace Venen Trading
         </Link>
@@ -103,7 +103,7 @@ export default function ApplyPage() {
           </p>
           <Link
             href="/"
-            className="mt-8 inline-block border-b border-white/10 pb-0.5 font-mono text-xs uppercase tracking-widest text-[var(--muted)] hover:text-[var(--gold)]"
+            className="mt-8 inline-block border-b border-white/10 pb-0.5 text-xs uppercase tracking-widest text-[var(--muted)] hover:text-[var(--gold)]"
           >
             ← Back to home
           </Link>
@@ -111,7 +111,7 @@ export default function ApplyPage() {
       ) : (
         <>
           <header className="mb-10">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[var(--gold)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-[var(--gold)]">
               Black Belt — Application
             </p>
             <h1 className="mt-3 font-display text-4xl font-extrabold leading-none text-[var(--paper)]">

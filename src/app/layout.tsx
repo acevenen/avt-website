@@ -1,28 +1,22 @@
 import type { Metadata } from "next";
-import { Archivo, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const archivo = Archivo({
+const inter = Inter({
   subsets: ["latin"],
-  axes: ["wdth"],
-  variable: "--font-archivo",
+  variable: "--font-inter",
 });
 
-const plexSans = IBM_Plex_Sans({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-plex-sans",
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-plex-mono",
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
 });
 
 export const metadata: Metadata = {
-  title: "Ace Venen Trading — Earn Your Belts",
+  title: "Ace Venen Trading — NQ Futures Coaching",
   description:
-    "The AVT belt progression: free Dojo community, real-time Signals, the Autopilot trading bot, the full Course, and Black Belt 1-on-1 coaching.",
+    "$200 to $20,000 in 90 days scalping NQ. The full belt-system course, real-time signals and the Autopilot bot, and 1-on-1 coaching until you pass your first funded account.",
 };
 
 export default function RootLayout({
@@ -33,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
