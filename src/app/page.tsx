@@ -1,329 +1,446 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { checkoutUrl } from "@/lib/checkout";
 
-// TODO(Ace): this invite expires 2026-07-03 — replace with a permanent invite.
+// TODO(Ace): this invite expired 2026-07-05 — replace with a permanent invite.
 const DISCORD = "https://discord.gg/hReBrtPFx";
 
+// ── Curriculum: the 9-belt spine (free White→Orange, paid Green→Brown III) ──
 const belts = [
-  { label: "White", color: "#f0ede6" },
-  { label: "Yellow", color: "#d4c44a" },
-  { label: "Orange", color: "#d4843a" },
-  { label: "Green", color: "#1db87e" },
-  { label: "Blue", color: "#4a8fd4" },
-  { label: "Purple", color: "#9b59b6" },
-  { label: "Brown", color: "#a0673a" },
-  { label: "Brown II", color: "#8a5530" },
-  { label: "Black", color: "#3a3a3a" },
+  { label: "White", color: "#f0ede6", tier: "free", title: "What trading actually is", blurb: "Mindset, tilt, revenge trading. Clearing the slate before a single setup." },
+  { label: "Yellow", color: "#d4c44a", tier: "free", title: "The non-negotiable rules", blurb: "NQ only. 9:30–11:30. 2:1 minimum. 1–2% risk. The math before the chart." },
+  { label: "Orange", color: "#d4843a", tier: "free", title: "Reading the chart", blurb: "Candles, structure, break of structure, supply & demand. The vocabulary." },
+  { label: "Green", color: "#1db87e", tier: "paid", title: "Daily bias & alignment", blurb: "Set direction before the open, then align it down to the 5-minute." },
+  { label: "Blue", color: "#4a8fd4", tier: "paid", title: "The 9/20 EMA setup", blurb: "The trigger. Retracement into a key level after a break of structure." },
+  { label: "Purple", color: "#9b59b6", tier: "paid", title: "Flags & momentum", blurb: "When to pull the trigger, when to sit. Volume, breakouts vs fakeouts." },
+  { label: "Brown", color: "#a0673a", tier: "paid", title: "Trade management", blurb: "Trailing stops, taking partials, adding to winners, cutting dead trades." },
+  { label: "Brown II", color: "#8a5530", tier: "paid", title: "Funded account gameplan", blurb: "Topstep & Lucid. Drawdown, daily loss limits, passing the combine." },
+  { label: "Brown III", color: "#5a3010", tier: "paid", title: "Discipline reinforcement", blurb: "Journaling, weekly reviews, diagnosing your own mistakes." },
+];
+
+type Plan = "course" | "trade" | "coach";
+
+const faqs = [
+  { q: "Do I need experience to start?", a: "No. White through Orange belts are free and assume zero knowledge — mindset, the rules, and how to read a chart. The paid course picks up where they leave off." },
+  { q: "What do I actually trade?", a: "NQ futures, during the New York open (9:30–11:30 AM EST). One instrument, one window. You master one market instead of jumping between assets." },
+  { q: "Signals, the bot, or the course — which is for me?", a: "The Course if you want to learn the system yourself. Signals or Autopilot if you'd rather trade alongside me while you learn. Black Belt if you want it built around you 1-on-1." },
+  { q: "Is the bot fully automated?", a: "Autopilot executes the AVT system for you with fixed stops and a daily circuit breaker built in. You set it up once with the onboarding guide." },
+  { q: "What's the refund / cancel policy?", a: "Signals and Autopilot are month-to-month — cancel anytime. The Course is a one-time purchase with lifetime portal access. Black Belt is application-reviewed before you pay." },
 ];
 
 export default function Home() {
-  return (
-    <div className="lp-root">
-      <style>{css}</style>
+  const [plan, setPlan] = useState<Plan>("course");
+  const [openBelt, setOpenBelt] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-      <nav className="lp-nav">
-        <Link href="/" className="lp-nav-logo">Ace Venen Trading</Link>
-        <div className="lp-nav-links">
+  return (
+    <div className="av">
+      <style>{css}</style>
+      <GrainGlow />
+
+      {/* NAV */}
+      <nav className="av-nav">
+        <Link href="/" className="av-logo">
+          <span className="av-spade">♠</span> Ace Venen Trading
+        </Link>
+        <div className="av-nav-links">
           <Link href="/learn">Free Course</Link>
-          <Link href="/paid">Student Portal</Link>
+          <Link href="/paid" className="av-nav-portal">Portal</Link>
         </div>
       </nav>
 
       {/* HERO */}
-      <section className="lp-hero">
-        <h1 className="lp-headline">
-          Discover The <span className="gold-italic">One System</span> That
-          Took Me From <span className="gold-italic">$200 → $20,000</span> In
-          90 Days Scalping NQ.
+      <header className="av-hero">
+        <div className="av-hero-badge"><span className="av-dot" /> Live cohort · 2026</div>
+        <h1 className="av-hero-h1">
+          Turn <span className="gi">two hours a day</span> into a{" "}
+          <span className="gi">funded paycheck.</span>
         </h1>
-        <p className="lp-hero-sub">
-          10 years of trading experience. The same approach that&apos;s helped
-          students pass Topstep, Lucid, and bank consistent{" "}
-          <strong>$1,500+ days.</strong>
+        <p className="av-hero-sub">
+          One system for scalping NQ futures — the same one that took me{" "}
+          <strong>$200 → $20,000 in 90 days.</strong> Start free. Rank up when you&apos;re ready.
         </p>
+        <div className="av-hero-cta">
+          <Link href="/learn" className="btn btn-gold">Start free →</Link>
+          <a href="#pricing" className="btn btn-ghost">See the paths</a>
+        </div>
 
-        <div className="lp-video-box">
-          <div className="lp-play-btn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="#000">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
+        {/* live wins ticker */}
+        <div className="av-ticker" aria-hidden>
+          <div className="av-ticker-track">
+            {[...tickerItems, ...tickerItems].map((t, i) => (
+              <span key={i} className="av-tick">
+                <span className="av-tick-amt">{t.amt}</span> {t.who}
+                <span className="av-tick-dot">♠</span>
+              </span>
+            ))}
           </div>
-          <div className="lp-video-label">Watch how the system works</div>
-          <div className="lp-video-hint">Drop your video file here when ready</div>
+        </div>
+      </header>
+
+      {/* PRICING — segmented, one path at a time (mobile: no scroll wall) */}
+      <section className="av-pricing" id="pricing">
+        <p className="av-eyebrow">Three ways in — one system</p>
+        <h2 className="av-h2">Pick your path.</h2>
+
+        <div className="av-seg" role="tablist">
+          <button className={`av-seg-btn ${plan === "course" ? "on" : ""}`} onClick={() => setPlan("course")} role="tab" aria-selected={plan === "course"}>
+            <span>The Course</span><span className="av-seg-price">$297</span>
+          </button>
+          <button className={`av-seg-btn ${plan === "trade" ? "on" : ""}`} onClick={() => setPlan("trade")} role="tab" aria-selected={plan === "trade"}>
+            <span>Trade With Me</span><span className="av-seg-price">$97+/mo</span>
+          </button>
+          <button className={`av-seg-btn ${plan === "coach" ? "on" : ""}`} onClick={() => setPlan("coach")} role="tab" aria-selected={plan === "coach"}>
+            <span>Coaching</span><span className="av-seg-price">$1K</span>
+          </button>
+          <span className={`av-seg-glow seg-${plan}`} aria-hidden />
+        </div>
+
+        {plan === "course" && (
+          <div className="av-panel">
+            <div className="av-panel-head">
+              <div>
+                <div className="av-panel-name">The Course</div>
+                <div className="av-panel-price"><sup>$</sup>297 <span className="av-panel-per">once · lifetime</span></div>
+              </div>
+              <div className="av-belt-strip" title="White → Black">
+                {belts.map((b) => <span key={b.label} style={{ background: b.color }} />)}
+                <span style={{ background: "#3a3a3a" }} />
+              </div>
+            </div>
+            <ul className="av-feat">
+              <li>The full belt curriculum — 9 animated modules</li>
+              <li>The 9/20 EMA flag system, broken down step by step</li>
+              <li>Risk, position management & the mental game</li>
+              <li>Funded-account gameplan — Topstep & Lucid</li>
+              <li>Lifetime access to the student portal</li>
+            </ul>
+            <a href={checkoutUrl("course")} className="btn btn-gold btn-block">Get the Course</a>
+            <p className="av-fine">White → Orange are <strong>free forever</strong> — <Link href="/learn">start there</Link> first.</p>
+          </div>
+        )}
+
+        {plan === "trade" && (
+          <div className="av-panel">
+            <div className="av-duo">
+              <div className="av-duo-col">
+                <div className="av-panel-name">Signals</div>
+                <div className="av-panel-price"><sup>$</sup>97<span className="av-panel-per">/mo</span></div>
+                <ul className="av-feat">
+                  <li>Real-time entries, stops & targets</li>
+                  <li>Context on every call — the why</li>
+                  <li>Cancel anytime</li>
+                </ul>
+                <a href={checkoutUrl("signals")} className="btn btn-gold btn-block">Start Signals</a>
+              </div>
+              <div className="av-duo-col">
+                <div className="av-panel-name">Autopilot <span className="av-tag-bot">BOT</span></div>
+                <div className="av-panel-price"><sup>$</sup>197<span className="av-panel-per">/mo</span></div>
+                <ul className="av-feat">
+                  <li>Automated execution of the system</li>
+                  <li>Fixed stops + daily circuit breaker</li>
+                  <li>Volume-adaptive trailing</li>
+                </ul>
+                <a href={checkoutUrl("autopilot")} className="btn btn-ghost btn-block">Get Autopilot</a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {plan === "coach" && (
+          <div className="av-panel av-panel-feat">
+            <div className="av-spots">⚡ 10 seats · application reviewed</div>
+            <div className="av-panel-price"><sup>$</sup>1,000 <span className="av-panel-per">3-month intensive</span></div>
+            <ul className="av-feat">
+              <li>1-on-1 coaching with Ace for 3 full months</li>
+              <li>24/7 direct access — no ticket system</li>
+              <li>Weekly calls + live trade reviews</li>
+              <li>Your trading rebuilt around your goals</li>
+              <li>Focused on passing your first funded account</li>
+            </ul>
+            <Link href="/apply" className="btn btn-gold btn-block">Apply for Black Belt</Link>
+            <p className="av-fine">Reviewed, not first-come. No ghosting. No upsells.</p>
+          </div>
+        )}
+      </section>
+
+      {/* CURRICULUM — interactive belt spine */}
+      <section className="av-curriculum" id="system">
+        <p className="av-eyebrow">The belt system</p>
+        <h2 className="av-h2">Level up, belt by belt.</h2>
+        <div className="av-belts">
+          {belts.map((b, i) => {
+            const open = openBelt === i;
+            return (
+              <div key={b.label} className={`av-belt ${open ? "open" : ""}`} style={{ ["--bc" as string]: b.color }}>
+                <button className="av-belt-head" onClick={() => setOpenBelt(open ? null : i)} aria-expanded={open}>
+                  <span className="av-belt-edge" />
+                  <span className="av-belt-main">
+                    <span className="av-belt-label">{b.label} Belt</span>
+                    <span className="av-belt-title">{b.title}</span>
+                  </span>
+                  <span className={`av-belt-tag ${b.tier}`}>{b.tier === "free" ? "FREE" : "🔒"}</span>
+                  <span className="av-belt-plus">{open ? "×" : "+"}</span>
+                </button>
+                <div className="av-belt-body" hidden={!open}>
+                  <p>{b.blurb}</p>
+                  {b.tier === "free" ? (
+                    <Link href="/learn" className="av-belt-link">Watch free →</Link>
+                  ) : (
+                    <a href={checkoutUrl("course")} className="av-belt-link">Unlock with the Course →</a>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      <div className="lp-divider" />
-
-      {/* RESULTS */}
-      <section className="lp-results">
-        <div className="lp-results-header">
-          <h2 className="lp-results-title">
-            Real <span className="gold-italic">Results</span> From Real{" "}
-            <span className="gold-italic">Traders</span>
-            <br />
-            Inside Ace Venen Trading
-          </h2>
-          <p className="lp-results-sub">Receipts. Screenshots. Funded Payouts.</p>
-        </div>
-        <div className="lp-pnl-cards">
-          {[
-            { amount: "+$18,686", name: "Chris — 15 days, part-time", detail: "Topstep combine, working full-time job" },
-            { amount: "+$1,510", name: "Tuesday session — NQ scalp", detail: "4 trades, 62 minutes" },
-            { amount: "+$3,037", name: "April combine — passed Topstep $50K", detail: "Upload your screenshot here" },
-          ].map((r) => (
-            <div key={r.amount} className="lp-pnl-card">
-              <div className="lp-pnl-screenshot"><span>P&amp;L Screenshot</span></div>
-              <div className="lp-pnl-info">
-                <div className="lp-pnl-amount">{r.amount}</div>
-                <div className="lp-pnl-name">{r.name}</div>
-                <div className="lp-pnl-detail">{r.detail}</div>
-              </div>
+      {/* PROOF — horizontal receipts */}
+      <section className="av-proof">
+        <p className="av-eyebrow">Receipts · screenshots · payouts</p>
+        <div className="av-proof-row">
+          {results.map((r) => (
+            <div key={r.amount} className="av-proof-card">
+              <div className="av-proof-shot"><span>P&amp;L</span></div>
+              <div className="av-proof-amt">{r.amount}</div>
+              <div className="av-proof-name">{r.name}</div>
+              <div className="av-proof-detail">{r.detail}</div>
             </div>
           ))}
         </div>
+        <p className="av-proof-note">Individual results vary. Screenshots are placeholders — real receipts drop in here.</p>
       </section>
 
-      <div className="lp-divider" />
-
-      {/* QUOTE */}
-      <section className="lp-quote">
-        <blockquote className="lp-quote-text">
-          &quot;First time my coach didn&apos;t ghost after the third call. He
-          stays until you&apos;re actually{" "}
-          <span className="underline-gold">profitable.</span>&quot;
-        </blockquote>
-        <p className="lp-quote-attr">— Student, 2026 Cohort</p>
-      </section>
-
-      {/* OFFERS — three products */}
-      <section className="lp-offer" id="offers">
-        <div className="lp-offer-inner">
-          <div className="lp-offer-tag">Three Ways In</div>
-          <h2 className="lp-offer-title">Pick your path.</h2>
-          <p className="lp-offer-subtitle">
-            Learn the system yourself, trade alongside me, or go 1-on-1.
-            <br />
-            Every path runs on the <strong>same AVT system.</strong>
-          </p>
-
-          {/* 1 — THE COURSE */}
-          <div className="lp-offer-card">
-            <div className="lp-card-tag">The Course</div>
-            <div className="lp-offer-price"><sup>$</sup>297</div>
-            <div className="lp-offer-period">One-time — lifetime access</div>
-            <div className="lp-belt-strip" aria-label="Belt progression: White to Black">
-              {belts.map((b) => (
-                <span key={b.label} className="lp-belt-seg" style={{ background: b.color }} title={b.label} />
-              ))}
-            </div>
-            <p className="lp-belt-caption">Level up belt by belt — White to Black.</p>
-            <ul className="lp-offer-features">
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>The full belt curriculum, start to finish</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>The 9/20 EMA system, broken down step by step</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Risk, position management, and the mental game</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Funded account gameplan — Topstep and Lucid</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Lifetime access to the student portal</li>
-            </ul>
-            <a href={checkoutUrl("course")} className="lp-offer-cta">Get the Course</a>
-            <p className="lp-offer-fine">
-              White through Orange Belt are <strong>free forever</strong> —{" "}
-              <Link href="/learn">start there</Link> before you spend a dollar.
-            </p>
-          </div>
-
-          {/* 2 — SIGNALS / AUTOPILOT */}
-          <div className="lp-offer-card">
-            <div className="lp-card-tag">Trade With Me</div>
-            <div className="lp-offer-price"><sup>$</sup>97<span className="lp-price-mo">/mo</span></div>
-            <div className="lp-offer-period">Signals — my trade alerts, in real time</div>
-            <ul className="lp-offer-features">
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Real-time entries, stops, and targets</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Context on every call — why the trade, not just the ticker</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Cancel anytime</li>
-            </ul>
-            <a href={checkoutUrl("signals")} className="lp-offer-cta">Start Signals</a>
-
-            <div className="lp-card-split" />
-
-            <div className="lp-offer-price"><sup>$</sup>197<span className="lp-price-mo">/mo</span></div>
-            <div className="lp-offer-period">Autopilot — the AVT bot trades the system for you</div>
-            <ul className="lp-offer-features">
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Automated execution of the AVT system</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Fixed stops and a daily circuit breaker built in</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Volume-adaptive trailing to lock in gains</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Setup guide and onboarding</li>
-            </ul>
-            <a href={checkoutUrl("autopilot")} className="lp-offer-cta lp-cta-outline">Get Autopilot</a>
-          </div>
-
-          {/* 3 — COACHING */}
-          <div className="lp-offer-card lp-card-featured">
-            <div className="lp-card-tag">Black Belt Coaching</div>
-            <div className="lp-spots-badge">⚡ 10 seats only — application reviewed</div>
-            <div className="lp-offer-price"><sup>$</sup>1,000</div>
-            <div className="lp-offer-period">One-time — 3 month intensive</div>
-            <ul className="lp-offer-features">
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>1-on-1 coaching with Ace for 3 full months</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>24/7 direct access — no ticket system, no delays</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Weekly 1-on-1 calls and live trade reviews</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Your trading reviewed and rebuilt around your goals</li>
-              <li className="lp-offer-feature"><span className="lp-fcheck">✓</span>Coaching focused on passing your first funded account</li>
-            </ul>
-            <Link href="/apply" className="lp-offer-cta">Apply for Black Belt</Link>
-            <p className="lp-offer-fine">
-              Applications reviewed — not first-come. No ghosting. No upsells.
-              One outcome.
-            </p>
-          </div>
+      {/* FAQ accordion */}
+      <section className="av-faq">
+        <h2 className="av-h2">Questions?</h2>
+        <div className="av-faq-list">
+          {faqs.map((f, i) => {
+            const open = openFaq === i;
+            return (
+              <div key={i} className={`av-faq-item ${open ? "open" : ""}`}>
+                <button className="av-faq-q" onClick={() => setOpenFaq(open ? null : i)} aria-expanded={open}>
+                  {f.q}<span>{open ? "−" : "+"}</span>
+                </button>
+                <div className="av-faq-a" hidden={!open}><p>{f.a}</p></div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* DISCORD */}
-      <section className="lp-discord">
-        <div className="lp-discord-inner">
-          <div className="lp-discord-tag">Free Community</div>
-          <h2 className="lp-discord-title">
-            Not ready to commit?
-            <br />
-            Join the free Discord.
-          </h2>
-          <p className="lp-discord-sub">
-            See how Ace trades. Watch student results come in. Get a feel for
-            the system before you commit a dollar.
-          </p>
-          <ul className="lp-discord-perks">
-            <li className="lp-discord-perk">Daily trade breakdowns from Ace</li>
-            <li className="lp-discord-perk">Market recaps after every session</li>
-            <li className="lp-discord-perk">Student wins posted in real time</li>
-            <li className="lp-discord-perk">Free NQ education and setups</li>
-          </ul>
-          <a href={DISCORD} target="_blank" rel="noopener noreferrer" className="lp-discord-btn">
-            Join the Free Discord
-          </a>
-          <p className="lp-discord-note">Free forever. No credit card. No catch.</p>
+      {/* FINAL CTA */}
+      <section className="av-final">
+        <span className="av-spade-big">♠</span>
+        <h2 className="av-final-h2">Start free. <span className="gi">Rank up when you&apos;re ready.</span></h2>
+        <div className="av-hero-cta">
+          <Link href="/learn" className="btn btn-gold">Start free →</Link>
+          <a href={DISCORD} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">Join the Dojo</a>
         </div>
       </section>
 
-      {/* DISCLAIMER */}
-      <div className="lp-disclaimer">
-        <p>
-          <strong>DISCLAIMER:</strong> Individuals&apos; Results May Vary. The
-          figures stated above are our personal figures. Please understand our
-          results are not typical, we are not implying you&apos;ll duplicate
-          them (or do anything for that matter). The average person who buys
-          any &quot;how to&quot; information gets little to no results. Your
-          results will vary and depend on many factors including but not
-          limited to your background, experience, and work ethic. All education
-          programs require risk and the assumption of consistent action.
+      <footer className="av-footer">
+        <div className="av-footer-links">
+          <Link href="/learn">Free Course</Link>
+          <Link href="/paid">Portal</Link>
+          <Link href="/apply">Apply</Link>
+          <a href={DISCORD} target="_blank" rel="noopener noreferrer">Discord</a>
+        </div>
+        <p className="av-disc">
+          Trading involves substantial risk and may result in loss of capital. Figures shown are not typical
+          and not a guarantee of results. © 2026 Ace Venen Trading.
         </p>
-        <p>© 2026 Ace Venen Trading. Trading involves substantial risk and may result in loss of capital.</p>
+      </footer>
+
+      {/* STICKY MOBILE CTA */}
+      <div className="av-sticky">
+        <Link href="/learn" className="btn btn-ghost av-sticky-ghost">Free</Link>
+        <a href={checkoutUrl("course")} className="btn btn-gold av-sticky-main">Get the Course — $297</a>
       </div>
     </div>
   );
 }
 
+const tickerItems = [
+  { amt: "+$18,686", who: "Chris · 15 days" },
+  { amt: "+$1,510", who: "NQ scalp · 62 min" },
+  { amt: "+$3,037", who: "Topstep $50K passed" },
+  { amt: "+$300/day", who: "Emilio · 1 session" },
+  { amt: "+$2,140", who: "Tuesday open" },
+];
+
+const results = [
+  { amount: "+$18,686", name: "Chris — 15 days, part-time", detail: "Topstep combine, full-time job" },
+  { amount: "+$1,510", name: "Tuesday session — NQ scalp", detail: "4 trades, 62 minutes" },
+  { amount: "+$3,037", name: "April combine", detail: "Passed Topstep $50K" },
+];
+
+function GrainGlow() {
+  return (
+    <>
+      <div className="av-glow" aria-hidden />
+      <svg className="av-grain" aria-hidden xmlns="http://www.w3.org/2000/svg">
+        <filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" /></filter>
+        <rect width="100%" height="100%" filter="url(#n)" />
+      </svg>
+    </>
+  );
+}
+
 const css = `
-  .lp-root { background: var(--ink); color: var(--paper); min-height: 100vh; }
+  .av { --edge: rgba(255,255,255,0.08); position: relative; min-height: 100vh; overflow-x: clip; }
+  .av * { box-sizing: border-box; }
 
-  /* NAV */
-  .lp-nav { padding: 28px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; max-width: 680px; margin: 0 auto; }
-  .lp-nav-logo { font-size: .75rem; letter-spacing: .25em; color: var(--muted); text-transform: uppercase; text-decoration: none; }
-  .lp-nav-links { display: flex; gap: 18px; }
-  .lp-nav-links a { font-size: .72rem; color: var(--muted); text-decoration: none; letter-spacing: .05em; transition: color .2s; }
-  .lp-nav-links a:hover { color: var(--gold); }
+  /* texture that kills the generic look */
+  .av-grain { position: fixed; inset: 0; width: 100%; height: 100%; opacity: 0.04; pointer-events: none; z-index: 0; mix-blend-mode: screen; }
+  .av-glow { position: fixed; top: -20%; left: 50%; transform: translateX(-50%); width: 900px; height: 700px; z-index: 0; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(232,184,75,0.18), transparent 70%); filter: blur(20px); }
+  .av > *:not(.av-grain):not(.av-glow) { position: relative; z-index: 1; }
 
-  /* HERO */
-  .lp-hero { padding: 80px 24px 72px; text-align: center; }
-  .lp-headline { font-size: clamp(2rem, 7vw, 3.2rem); font-weight: 700; line-height: 1.2; letter-spacing: -.02em; max-width: 640px; margin: 0 auto 24px; }
-  .gold-italic { color: var(--gold); font-family: var(--font-playfair), serif; font-style: italic; }
-  .lp-hero-sub { font-size: 1rem; color: var(--muted); max-width: 480px; margin: 0 auto 48px; line-height: 1.7; }
-  .lp-hero-sub strong { color: var(--paper); }
+  .gi { font-family: var(--font-display), serif; font-style: italic; color: var(--gold); }
+  .av-h2 { font-size: clamp(1.7rem, 6vw, 2.6rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; margin: 6px 0 20px; }
+  .av-eyebrow { font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
 
-  /* VIDEO */
-  .lp-video-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 64px 24px; max-width: 580px; margin: 0 auto; cursor: pointer; transition: border-color .2s; }
-  .lp-video-box:hover { border-color: rgba(232,184,75,.3); }
-  .lp-play-btn { width: 64px; height: 64px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
-  .lp-play-btn svg { margin-left: 4px; }
-  .lp-video-label { font-weight: 600; font-size: .95rem; margin-bottom: 6px; }
-  .lp-video-hint { font-size: .78rem; color: var(--muted); }
+  /* buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: .92rem; font-weight: 700;
+    padding: 15px 26px; border-radius: 100px; text-decoration: none; transition: transform .18s, box-shadow .18s, background .18s; white-space: nowrap; cursor: pointer; border: none; }
+  .btn-gold { background: var(--gold); color: #000; box-shadow: 0 8px 30px rgba(232,184,75,.25); }
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(232,184,75,.35); }
+  .btn-ghost { background: rgba(255,255,255,0.04); color: var(--paper); border: 1px solid var(--edge); }
+  .btn-ghost:hover { border-color: rgba(232,184,75,.5); transform: translateY(-2px); }
+  .btn-block { display: flex; width: 100%; }
 
-  .lp-divider { height: 1px; background: var(--border); }
+  /* nav */
+  .av-nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; backdrop-filter: blur(14px); background: rgba(6,6,6,.7); border-bottom: 1px solid var(--edge); }
+  .av-logo { font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .av-spade { color: var(--gold); }
+  .av-nav-links { display: flex; gap: 8px; align-items: center; }
+  .av-nav-links a { font-size: .74rem; color: var(--muted); text-decoration: none; padding: 8px 12px; border-radius: 100px; transition: color .2s, background .2s; }
+  .av-nav-links a:hover { color: var(--paper); }
+  .av-nav-portal { border: 1px solid var(--edge); color: var(--paper) !important; }
 
-  /* RESULTS */
-  .lp-results { padding: 80px 24px; }
-  .lp-results-header { text-align: center; margin-bottom: 56px; }
-  .lp-results-title { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 700; line-height: 1.25; margin-bottom: 10px; }
-  .lp-results-sub { font-size: .78rem; letter-spacing: .15em; color: var(--muted); text-transform: uppercase; }
-  .lp-pnl-cards { display: flex; flex-direction: column; gap: 16px; max-width: 580px; margin: 0 auto; }
-  .lp-pnl-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .lp-pnl-screenshot { border: 1.5px dashed rgba(255,255,255,.12); border-radius: 6px; margin: 16px 16px 0; padding: 40px 16px; text-align: center; }
-  .lp-pnl-screenshot span { font-size: .7rem; letter-spacing: .15em; color: rgba(255,255,255,.2); text-transform: uppercase; }
-  .lp-pnl-info { padding: 16px 20px 20px; }
-  .lp-pnl-amount { font-size: 1.6rem; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
-  .lp-pnl-name { font-size: .92rem; font-weight: 600; margin-bottom: 2px; }
-  .lp-pnl-detail { font-size: .8rem; color: var(--muted); }
+  /* hero */
+  .av-hero { max-width: 780px; margin: 0 auto; padding: 46px 22px 30px; text-align: center; }
+  .av-hero-badge { display: inline-flex; align-items: center; gap: 8px; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--edge); border-radius: 100px; padding: 6px 14px; margin-bottom: 22px; }
+  .av-dot { width: 7px; height: 7px; border-radius: 50%; background: #1db87e; box-shadow: 0 0 10px #1db87e; animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+  .av-hero-h1 { font-size: clamp(2.1rem, 8.5vw, 4rem); font-weight: 800; line-height: 1.04; letter-spacing: -0.035em; margin-bottom: 18px; }
+  .av-hero-sub { font-size: 1rem; color: var(--muted); line-height: 1.65; max-width: 520px; margin: 0 auto 26px; }
+  .av-hero-sub strong { color: var(--paper); }
+  .av-hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
-  /* QUOTE */
-  .lp-quote { padding: 80px 24px; text-align: center; border-top: 1px solid var(--border); }
-  .lp-quote-text { font-family: var(--font-playfair), serif; font-style: italic; font-size: clamp(1.25rem, 4vw, 1.75rem); line-height: 1.55; max-width: 560px; margin: 0 auto 20px; }
-  .underline-gold { color: var(--gold); text-decoration: underline; text-decoration-color: rgba(232,184,75,.5); text-underline-offset: 4px; }
-  .lp-quote-attr { font-size: .72rem; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
+  /* ticker */
+  .av-ticker { margin-top: 34px; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); border-top: 1px solid var(--edge); border-bottom: 1px solid var(--edge); padding: 12px 0; }
+  .av-ticker-track { display: inline-flex; gap: 34px; white-space: nowrap; animation: scroll 26s linear infinite; }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+  .av-tick { display: inline-flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--muted); }
+  .av-tick-amt { color: #1db87e; font-weight: 700; }
+  .av-tick-dot { color: var(--gold); opacity: .4; }
 
-  /* OFFERS */
-  .lp-offer { padding: 80px 24px; border-top: 1px solid var(--border); }
-  .lp-offer-inner { max-width: 580px; margin: 0 auto; text-align: center; }
-  .lp-offer-tag { font-size: .68rem; letter-spacing: .2em; color: var(--gold); text-transform: uppercase; margin-bottom: 14px; }
-  .lp-offer-title { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 700; line-height: 1.1; margin-bottom: 12px; }
-  .lp-offer-subtitle { font-size: .95rem; color: var(--muted); line-height: 1.8; margin-bottom: 48px; }
-  .lp-offer-subtitle strong { color: var(--paper); }
+  /* section shells */
+  .av-pricing, .av-curriculum, .av-proof, .av-faq, .av-final { max-width: 680px; margin: 0 auto; padding: 40px 22px; }
 
-  .lp-offer-card { background: var(--card); border: 1px solid rgba(232,184,75,.2); border-radius: 12px; padding: 40px 36px; text-align: left; margin-bottom: 24px; }
-  .lp-card-featured { border-color: rgba(232,184,75,.45); }
-  .lp-card-tag { font-size: .68rem; letter-spacing: .2em; color: var(--gold); text-transform: uppercase; margin-bottom: 20px; }
-  .lp-offer-price { font-size: 3.5rem; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 6px; }
-  .lp-offer-price sup { font-size: 1.8rem; vertical-align: super; }
-  .lp-price-mo { font-size: 1.2rem; font-weight: 600; color: var(--muted); }
-  .lp-offer-period { font-size: .75rem; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 28px; }
-  .lp-offer-features { list-style: none; margin-bottom: 36px; padding: 0; }
-  .lp-offer-feature { display: flex; align-items: flex-start; gap: 12px; font-size: .88rem; color: var(--muted); padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
-  .lp-offer-feature:last-child { border-bottom: none; }
-  .lp-fcheck { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
-  .lp-offer-cta { display: block; text-align: center; background: var(--gold); color: #000; font-size: .85rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 18px; border-radius: 100px; text-decoration: none; transition: all .22s; }
-  .lp-offer-cta:hover { background: #f0c85a; transform: translateY(-2px); box-shadow: 0 10px 32px rgba(232,184,75,.22); }
-  .lp-cta-outline { background: transparent; border: 1px solid rgba(232,184,75,.4); color: var(--gold); }
-  .lp-cta-outline:hover { background: rgba(232,184,75,.08); box-shadow: none; }
-  .lp-offer-fine { font-size: .72rem; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.8; }
-  .lp-offer-fine strong { color: rgba(255,255,255,.4); }
-  .lp-offer-fine a { color: var(--gold); text-decoration: none; }
-  .lp-card-split { height: 1px; background: rgba(255,255,255,.08); margin: 32px 0; }
+  /* segmented control */
+  .av-seg { position: relative; display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; background: rgba(255,255,255,0.03);
+    border: 1px solid var(--edge); border-radius: 16px; padding: 5px; margin-bottom: 18px; }
+  .av-seg-btn { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 6px;
+    background: none; border: none; color: var(--muted); cursor: pointer; border-radius: 12px; font-size: .82rem; font-weight: 600; transition: color .2s; }
+  .av-seg-btn.on { color: #000; }
+  .av-seg-price { font-size: .72rem; opacity: .8; }
+  .av-seg-glow { position: absolute; top: 5px; bottom: 5px; width: calc((100% - 10px) / 3); border-radius: 12px; background: var(--gold); z-index: 1; transition: transform .28s cubic-bezier(.4,1.3,.5,1); }
+  .seg-course { transform: translateX(0); }
+  .seg-trade { transform: translateX(100%); }
+  .seg-coach { transform: translateX(200%); }
 
-  .lp-spots-badge { display: inline-block; background: rgba(232,184,75,.08); border: 1px solid rgba(232,184,75,.2); color: var(--gold); font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 32px; }
+  .av-panel { border: 1px solid var(--edge); border-radius: 18px; padding: 24px; background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent); animation: rise .3s ease; }
+  .av-panel-feat { border-color: rgba(232,184,75,.35); box-shadow: 0 0 60px rgba(232,184,75,.06) inset; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+  .av-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+  .av-panel-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+  .av-tag-bot { font-size: .58rem; letter-spacing: .1em; background: rgba(74,143,212,.18); color: #7bb0e8; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+  .av-panel-price { font-size: 2.4rem; font-weight: 800; color: var(--gold); letter-spacing: -.03em; line-height: 1; }
+  .av-panel-price sup { font-size: 1.1rem; vertical-align: super; }
+  .av-panel-per { font-size: .7rem; font-weight: 500; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; vertical-align: middle; }
+  .av-belt-strip { display: flex; gap: 3px; flex-shrink: 0; padding-top: 6px; }
+  .av-belt-strip span { width: 9px; height: 26px; border-radius: 3px; }
+  .av-feat { list-style: none; padding: 0; margin: 6px 0 20px; display: flex; flex-direction: column; gap: 10px; }
+  .av-feat li { font-size: .88rem; color: var(--muted); padding-left: 26px; position: relative; line-height: 1.4; }
+  .av-feat li::before { content: "✓"; position: absolute; left: 0; color: var(--gold); font-weight: 700; }
+  .av-fine { font-size: .74rem; color: var(--muted); text-align: center; margin-top: 14px; }
+  .av-fine a { color: var(--gold); }
+  .av-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .av-duo-col { display: flex; flex-direction: column; }
+  .av-duo-col .btn { margin-top: auto; }
+  .av-spots { display: inline-block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid rgba(232,184,75,.3); background: rgba(232,184,75,.07); border-radius: 100px; padding: 5px 12px; margin-bottom: 14px; }
 
-  /* BELT STRIP (course card) */
-  .lp-belt-strip { display: flex; gap: 4px; margin-bottom: 10px; }
-  .lp-belt-seg { height: 8px; flex: 1; border-radius: 2px; }
-  .lp-belt-caption { font-size: .75rem; color: var(--muted); margin-bottom: 24px; }
+  /* curriculum */
+  .av-belts { display: flex; flex-direction: column; gap: 8px; }
+  .av-belt { border: 1px solid var(--edge); border-radius: 14px; overflow: hidden; background: rgba(255,255,255,0.02); transition: border-color .2s; }
+  .av-belt.open { border-color: color-mix(in srgb, var(--bc) 45%, transparent); }
+  .av-belt-head { width: 100%; display: flex; align-items: center; gap: 12px; padding: 15px 16px; background: none; border: none; cursor: pointer; text-align: left; color: var(--paper); }
+  .av-belt-edge { width: 5px; align-self: stretch; border-radius: 4px; background: var(--bc); box-shadow: 0 0 12px color-mix(in srgb, var(--bc) 60%, transparent); flex-shrink: 0; }
+  .av-belt-main { flex: 1; min-width: 0; }
+  .av-belt-label { display: block; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--bc); margin-bottom: 3px; }
+  .av-belt-title { display: block; font-size: .96rem; font-weight: 600; }
+  .av-belt-tag { font-size: .58rem; letter-spacing: .08em; padding: 3px 8px; border-radius: 100px; flex-shrink: 0; }
+  .av-belt-tag.free { background: rgba(29,184,126,.15); color: #4fd39e; }
+  .av-belt-tag.paid { background: rgba(255,255,255,0.05); }
+  .av-belt-plus { font-size: 1.3rem; color: var(--muted); width: 20px; text-align: center; flex-shrink: 0; }
+  .av-belt-body { padding: 0 16px 16px 33px; animation: rise .25s ease; }
+  .av-belt-body p { font-size: .86rem; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
+  .av-belt-link { font-size: .8rem; font-weight: 600; color: var(--gold); text-decoration: none; }
 
-  /* DISCORD */
-  .lp-discord { padding: 80px 24px; border-top: 1px solid var(--border); }
-  .lp-discord-inner { max-width: 580px; margin: 0 auto; text-align: center; }
-  .lp-discord-tag { font-size: .68rem; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
-  .lp-discord-title { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
-  .lp-discord-sub { font-size: .92rem; color: var(--muted); line-height: 1.8; margin-bottom: 32px; max-width: 440px; margin-left: auto; margin-right: auto; }
-  .lp-discord-perks { list-style: none; text-align: left; max-width: 360px; margin: 0 auto 36px; display: flex; flex-direction: column; gap: 12px; padding: 0; }
-  .lp-discord-perk { display: flex; align-items: center; gap: 12px; font-size: .88rem; color: var(--muted); }
-  .lp-discord-perk::before { content: '→'; color: var(--gold); flex-shrink: 0; }
-  .lp-discord-btn { display: inline-block; border: 1px solid rgba(232,184,75,.3); color: var(--gold); font-size: .8rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 16px 40px; border-radius: 100px; text-decoration: none; transition: all .22s; }
-  .lp-discord-btn:hover { background: rgba(232,184,75,.08); transform: translateY(-2px); }
-  .lp-discord-note { font-size: .68rem; color: var(--muted); margin-top: 14px; letter-spacing: .05em; }
+  /* proof */
+  .av-proof-row { display: flex; gap: 12px; overflow-x: auto; padding: 6px 0 12px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .av-proof-row::-webkit-scrollbar { display: none; }
+  .av-proof-card { flex: 0 0 210px; scroll-snap-align: start; border: 1px solid var(--edge); border-radius: 14px; padding: 14px; background: rgba(255,255,255,0.02); }
+  .av-proof-shot { border: 1.5px dashed rgba(255,255,255,.14); border-radius: 8px; padding: 26px; text-align: center; margin-bottom: 12px; }
+  .av-proof-shot span { font-size: .62rem; letter-spacing: .18em; color: rgba(255,255,255,.22); }
+  .av-proof-amt { font-size: 1.5rem; font-weight: 800; color: #1db87e; }
+  .av-proof-name { font-size: .82rem; font-weight: 600; margin-top: 2px; }
+  .av-proof-detail { font-size: .74rem; color: var(--muted); }
+  .av-proof-note { font-size: .68rem; color: var(--muted); margin-top: 8px; }
 
-  /* DISCLAIMER */
-  .lp-disclaimer { padding: 48px 24px 40px; border-top: 1px solid var(--border); max-width: 640px; margin: 64px auto 0; }
-  .lp-disclaimer p { font-size: .72rem; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
-  .lp-disclaimer strong { color: rgba(255,255,255,.4); }
+  /* faq */
+  .av-faq-list { display: flex; flex-direction: column; gap: 8px; }
+  .av-faq-item { border: 1px solid var(--edge); border-radius: 14px; overflow: hidden; background: rgba(255,255,255,0.02); }
+  .av-faq-q { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px; background: none; border: none;
+    color: var(--paper); font-size: .9rem; font-weight: 600; text-align: left; cursor: pointer; }
+  .av-faq-q span { color: var(--gold); font-size: 1.2rem; flex-shrink: 0; }
+  .av-faq-a { padding: 0 16px 16px; animation: rise .25s ease; }
+  .av-faq-a p { font-size: .85rem; color: var(--muted); line-height: 1.6; }
 
-  @media (max-width: 480px) {
-    .lp-offer-card { padding: 28px 20px; }
+  /* final */
+  .av-final { text-align: center; }
+  .av-spade-big { font-size: 2.6rem; color: var(--gold); opacity: .8; display: block; margin-bottom: 6px; }
+  .av-final-h2 { font-size: clamp(1.8rem, 7vw, 2.8rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 24px; }
+
+  /* footer */
+  .av-footer { max-width: 680px; margin: 0 auto; padding: 30px 22px 120px; border-top: 1px solid var(--edge); text-align: center; }
+  .av-footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
+  .av-footer-links a { font-size: .78rem; color: var(--muted); text-decoration: none; }
+  .av-footer-links a:hover { color: var(--gold); }
+  .av-disc { font-size: .66rem; color: rgba(255,255,255,.32); line-height: 1.7; max-width: 460px; margin: 0 auto; }
+
+  /* sticky mobile CTA */
+  .av-sticky { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; display: none; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(6,6,6,.86); backdrop-filter: blur(14px); border-top: 1px solid var(--edge); }
+  .av-sticky-ghost { flex: 0 0 auto; padding: 15px 22px; }
+  .av-sticky-main { flex: 1; }
+
+  @media (max-width: 720px) {
+    .av-duo { grid-template-columns: 1fr; }
+    .av-sticky { display: flex; }
+    .av-nav-links a:first-child { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .av-ticker-track { animation: none; }
+    .av-dot { animation: none; }
   }
 `;
