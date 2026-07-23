@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { beltVideos, embedUrl } from "@/data/videos";
 
 const DISCORD = "https://discord.gg/hReBrtPFx";
 const AVT_HOME = "https://avt-website.vercel.app";
@@ -10,6 +11,7 @@ const AVT_HOME = "https://avt-website.vercel.app";
 const pillars = [
   {
     id: "p1",
+    beltId: "white",
     num: "01",
     tier: "free",
     eyebrow: "Free — Full access",
@@ -20,6 +22,7 @@ const pillars = [
   },
   {
     id: "p2",
+    beltId: "yellow",
     num: "02",
     tier: "free",
     eyebrow: "Free — Full access",
@@ -30,6 +33,7 @@ const pillars = [
   },
   {
     id: "p3",
+    beltId: "orange",
     num: "03",
     tier: "partial",
     eyebrow: "Free intro · Application is paid",
@@ -143,10 +147,15 @@ function PillarModule({ pillar }: { pillar: (typeof pillars)[0] }) {
 
       {open && (
         <div className="l-mod-body">
-          {/* Video block */}
-          {pillar.videoSrc ? (
+          {/* Video block — pulls from the central belt-video config */}
+          {beltVideos[pillar.beltId]?.youTubeId ? (
             <div className="l-video-embed">
-              <iframe src={pillar.videoSrc} allowFullScreen title={pillar.title} />
+              <iframe
+                src={embedUrl(beltVideos[pillar.beltId].youTubeId)}
+                title={beltVideos[pillar.beltId].label}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
             </div>
           ) : (
             <div className="l-video-placeholder">

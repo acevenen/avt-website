@@ -1,17 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { beltVideos, embedUrl } from "@/data/videos";
+import { tier1, tier2 } from "@/data/quizzes";
+import TierTest from "@/components/TierTest";
 
 const DISCORD = "https://discord.gg/hReBrtPFx";
 const CORRECT_PASSWORD = "AVTDOJO"; // TODO: change before going live
 
 const belts = [
-  { id: "green",   color: "#1db87e", label: "Green",     title: "Daily Bias & Timeframe Alignment" },
-  { id: "blue",    color: "#4a8fd4", label: "Blue",      title: "The 9/20 EMA Setup" },
-  { id: "purple",  color: "#9b59b6", label: "Purple",    title: "Flags, Momentum & Execution" },
-  { id: "brown",   color: "#a0673a", label: "Brown",     title: "Trade Management & Scaling" },
-  { id: "brown2",  color: "#7a4520", label: "Brown II",  title: "Funded Account Gameplan" },
-  { id: "brown3",  color: "#5a3010", label: "Brown III", title: "Discipline Reinforcement" },
+  { id: "green",   color: "#1db87e", label: "Green",     title: "Daily Bias & Timeframe Alignment", tier: "intermediate" },
+  { id: "blue",    color: "#4a8fd4", label: "Blue",      title: "The 9/20 EMA Setup",                tier: "intermediate" },
+  { id: "purple",  color: "#9b59b6", label: "Purple",    title: "Flags, Momentum & Execution",       tier: "intermediate" },
+  { id: "brown",   color: "#a0673a", label: "Brown",     title: "Trade Management & Scaling",        tier: "advanced" },
+  { id: "brown2",  color: "#7a4520", label: "Brown II",  title: "Funded Account Gameplan",           tier: "advanced" },
+  { id: "brown3",  color: "#5a3010", label: "Brown III", title: "Discipline Reinforcement",          tier: "advanced" },
 ];
 
 export default function PaidPage() {
@@ -19,10 +22,29 @@ export default function PaidPage() {
   const [pw, setPw]         = useState("");
   const [err, setErr]       = useState(false);
   const [active, setActive] = useState("green");
+  const [passed1, setPassed1] = useState(false); // Beginner test cleared
+  const [passed2, setPassed2] = useState(false); // Intermediate test cleared
 
   useEffect(() => {
     if (sessionStorage.getItem("avt_auth") === "1") setAuthed(true);
+    // NOTE: local progress for now — rebinds to the per-user account once auth ships.
+    if (localStorage.getItem("avt_tier1") === "1") setPassed1(true);
+    if (localStorage.getItem("avt_tier2") === "1") setPassed2(true);
   }, []);
+
+  function passTier1() {
+    localStorage.setItem("avt_tier1", "1");
+    setPassed1(true);
+  }
+  function passTier2() {
+    localStorage.setItem("avt_tier2", "1");
+    setPassed2(true);
+  }
+
+  const activeBelt = belts.find((b) => b.id === active)!;
+  const beltLocked = (b: (typeof belts)[number]) =>
+    (b.tier === "intermediate" && !passed1) || (b.tier === "advanced" && !passed2);
+  const activeLocked = beltLocked(activeBelt);
 
   function checkPassword() {
     if (pw.trim().toUpperCase() === CORRECT_PASSWORD) {
@@ -79,26 +101,54 @@ export default function PaidPage() {
 
       {/* TABS */}
       <div className="pd-tabs">
-        {belts.map(b => (
-          <button
-            key={b.id}
-            className={`pd-tab ${active === b.id ? "pd-tab-active" : ""}`}
-            onClick={() => setActive(b.id)}
-          >
-            <span className="pd-tab-dot" style={{ background: b.color }} />
-            {b.label}
-          </button>
-        ))}
+        {belts.map((b, i) => {
+          const prevTier = belts[i - 1]?.tier;
+          const showDivider = i > 0 && b.tier !== prevTier;
+          return (
+            <span key={b.id} style={{ display: "contents" }}>
+              {showDivider && <span className="pd-tier-div" aria-hidden />}
+              <button
+                className={`pd-tab ${active === b.id ? "pd-tab-active" : ""} ${beltLocked(b) ? "pd-tab-locked" : ""}`}
+                onClick={() => setActive(b.id)}
+              >
+                <span className="pd-tab-dot" style={{ background: b.color }} />
+                {b.label}
+                {beltLocked(b) && <span className="pd-tab-lock">🔒</span>}
+              </button>
+            </span>
+          );
+        })}
       </div>
 
-      {/* BELT CONTENT */}
+      {/* BELT CONTENT — tier tests gate the jump between tiers */}
       <div className="pd-content">
-        {active === "green"  && <GreenBelt  setActive={setActive} />}
-        {active === "blue"   && <BlueBelt   setActive={setActive} />}
-        {active === "purple" && <PurpleBelt setActive={setActive} />}
-        {active === "brown"  && <BrownBelt  setActive={setActive} />}
-        {active === "brown2" && <Brown2Belt setActive={setActive} />}
-        {active === "brown3" && <Brown3Belt />}
+        {activeLocked ? (
+          activeBelt.tier === "advanced" ? (
+            <div className="pd-gate-test">
+              <p className="pd-gate-test-note">
+                🥋 Pass the Intermediate test to unlock the Advanced belts.
+              </p>
+              <TierTest quiz={tier2} onPass={passTier2} />
+            </div>
+          ) : (
+            <div className="pd-gate-test">
+              <p className="pd-gate-test-note">
+                🥋 Quick placement test — clears the Intermediate belts. Not hard,
+                just proves the fundamentals stuck.
+              </p>
+              <TierTest quiz={tier1} onPass={passTier1} />
+            </div>
+          )
+        ) : (
+          <>
+            {active === "green"  && <GreenBelt  setActive={setActive} />}
+            {active === "blue"   && <BlueBelt   setActive={setActive} />}
+            {active === "purple" && <PurpleBelt setActive={setActive} />}
+            {active === "brown"  && <BrownBelt  setActive={setActive} />}
+            {active === "brown2" && <Brown2Belt setActive={setActive} />}
+            {active === "brown3" && <Brown3Belt />}
+          </>
+        )}
       </div>
     </div>
   );
@@ -106,11 +156,24 @@ export default function PaidPage() {
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
-function VideoBlock({ label }: { label: string }) {
+function VideoBlock({ beltId }: { beltId: string }) {
+  const v = beltVideos[beltId];
+  if (v?.youTubeId) {
+    return (
+      <div className="pd-video-embed">
+        <iframe
+          src={embedUrl(v.youTubeId)}
+          title={v.label}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
   return (
     <div className="pd-video">
       <div className="pd-play" />
-      <span className="pd-video-label">{label} — swap in your Loom / YouTube embed URL</span>
+      <span className="pd-video-label">{v?.label ?? beltId} — video coming soon</span>
     </div>
   );
 }
@@ -195,7 +258,7 @@ function GreenBelt({ setActive }: { setActive: (s: string) => void }) {
       <h2>Daily Bias & Timeframe Alignment</h2>
       <p className="pd-desc">Before you place a single trade, you already know the direction. This belt is your pre-market routine — how to read the higher timeframes and build a directional thesis before the NY open.</p>
 
-      <VideoBlock label="Green Belt — Daily Bias" />
+      <VideoBlock beltId="green" />
 
       <SectionTitle>What is daily bias</SectionTitle>
       <p className="pd-intro">Daily bias is the single most important decision you make before each session. Before you look at a 5-minute chart, you need to know: am I bullish, bearish, or flat today? That answer filters every setup you consider.</p>
@@ -240,7 +303,7 @@ function BlueBelt({ setActive }: { setActive: (s: string) => void }) {
       <h2>The 9/20 EMA Setup</h2>
       <p className="pd-desc">This is the system. Everything before this belt was building to this moment — the actual trigger. The 9 and 20 EMA retracement into a key level after a break of structure.</p>
 
-      <VideoBlock label="Blue Belt — The 9/20 EMA Setup" />
+      <VideoBlock beltId="blue" />
 
       <SectionTitle>Understanding the EMAs</SectionTitle>
       <p className="pd-intro">The 9 and 20 EMA are plotted on the 5-minute chart. Together they act as a dynamic support zone during a trend — a level price tends to retrace to before continuing.</p>
@@ -288,7 +351,7 @@ function PurpleBelt({ setActive }: { setActive: (s: string) => void }) {
       <h2>Flags, Momentum & Execution</h2>
       <p className="pd-desc">The EMA gets you in the right area. Flags tell you when the move is actually ready. This belt is about reading momentum — knowing when to pull the trigger and when to sit out.</p>
 
-      <VideoBlock label="Purple Belt — Flags & Momentum" />
+      <VideoBlock beltId="purple" />
 
       <SectionTitle>Anatomy of a flag</SectionTitle>
       <RuleBlock label="The Pole" value={<>Strong directional move — <em>3+ clean candles</em></>} note="Aggressive push with clear momentum. This is what you're riding the continuation of." />
@@ -340,7 +403,7 @@ function BrownBelt({ setActive }: { setActive: (s: string) => void }) {
       <h2>Trade Management & Scaling</h2>
       <p className="pd-desc">Getting in is half the job. What you do after you&apos;re in determines whether you actually make money. Most traders enter well and then self-sabotage. This belt fixes that.</p>
 
-      <VideoBlock label="Brown Belt — Trade Management" />
+      <VideoBlock beltId="brown" />
 
       <SectionTitle>Setting your take profit</SectionTitle>
       <RuleBlock label="First target" value={<>Previous swing high — <em>minimum 2:1 from stop</em></>} note="Mark it before you enter. If the previous swing high doesn't give you 2:1 R:R from your stop, the setup doesn't meet criteria. Skip it." />
@@ -388,7 +451,7 @@ function Brown2Belt({ setActive }: { setActive: (s: string) => void }) {
       <h2>Funded Account Gameplan</h2>
       <p className="pd-desc">This belt is about turning everything you&apos;ve learned into real payouts. I passed Topstep in February 2025. Here&apos;s exactly how.</p>
 
-      <VideoBlock label="Brown Belt II — Funded Account Gameplan" />
+      <VideoBlock beltId="brown2" />
 
       <SectionTitle>How prop firms work</SectionTitle>
       <RuleBlock label="Topstep — $50K account" value={<>Profit target: <em>$3,000</em></>} note="Daily loss limit ~$1,000 (2%). Trailing drawdown ~$2,500–$3,000. No time limit to pass." />
@@ -430,7 +493,7 @@ function Brown3Belt() {
       <h2>Discipline Reinforcement</h2>
       <p className="pd-desc">The belt system gave you the tools. This belt keeps them sharp. Journaling, weekly trade reviews, diagnosing your own mistakes — the process that keeps psychology alive under pressure.</p>
 
-      <VideoBlock label="Brown Belt III — Discipline Reinforcement" />
+      <VideoBlock beltId="brown3" />
 
       <SectionTitle>The trade journal — what to log</SectionTitle>
       <RuleBlock label="Every trade — required fields" value={<>Date · Direction · Size · <em>Result</em></>} note="Entry price, stop price, target price, actual exit. R:R planned vs actual. Did you follow your rules? Y/N." />
@@ -521,6 +584,13 @@ const css = `
   .pd-tab:hover { color:var(--pd-muted2); }
   .pd-tab-active { color:var(--pd-white); background:var(--pd-surface); border-color:var(--pd-border); border-bottom-color:var(--pd-surface); }
   .pd-tab-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .pd-tab-locked { opacity:0.55; }
+  .pd-tab-lock { font-size:9px; margin-left:2px; }
+  .pd-tier-div { width:1px; align-self:center; height:16px; background:var(--pd-border-b); margin:0 6px; flex-shrink:0; }
+  .pd-gate-test { padding:1.75rem 1.25rem; animation:pdFadeUp 0.3s ease both; }
+  .pd-gate-test-note { max-width:640px; margin:0 auto 1.5rem; text-align:center; font-size:12px; color:var(--pd-muted2); line-height:1.6; background:var(--pd-surface2); border:0.5px solid var(--pd-border); border-radius:10px; padding:12px 16px; }
+  .pd-video-embed { position:relative; width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden; border:0.5px solid var(--pd-border-b); margin-bottom:1.5rem; background:#000; }
+  .pd-video-embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
   /* CONTENT */
   .pd-content { animation:pdFadeUp 0.3s ease both; }
   .pd-module { padding:1.5rem 1.25rem; }
