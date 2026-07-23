@@ -19,26 +19,67 @@ const belts = [
 
 export default function PaidPage() {
   const [authed, setAuthed] = useState(false);
+  const [user, setUser]     = useState("");
   const [pw, setPw]         = useState("");
-  const [err, setErr]       = useState(false);
+  const [err, setErr]       = useState("");
+  const [busy, setBusy]     = useState(false);
+  const [dbMode, setDbMode] = useState<boolean | null>(null); // true = real accounts
+  const [username, setUsername] = useState<string | null>(null);
   const [active, setActive] = useState("green");
   const [passed1, setPassed1] = useState(false); // Beginner test cleared
   const [passed2, setPassed2] = useState(false); // Intermediate test cleared
 
+  // Resolve auth mode: real per-student accounts once DATABASE_URL is set,
+  // otherwise fall back to the legacy shared password so access never breaks.
   useEffect(() => {
-    if (sessionStorage.getItem("avt_auth") === "1") setAuthed(true);
-    // NOTE: local progress for now — rebinds to the per-user account once auth ships.
-    if (localStorage.getItem("avt_tier1") === "1") setPassed1(true);
-    if (localStorage.getItem("avt_tier2") === "1") setPassed2(true);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/me");
+        const data = await res.json();
+        if (cancelled) return;
+        setDbMode(Boolean(data.dbConfigured));
+        if (data.student) {
+          setAuthed(true);
+          setUsername(data.student.username);
+          setPassed1(Boolean(data.student.tier1_passed));
+          setPassed2(Boolean(data.student.tier2_passed));
+          return;
+        }
+        if (!data.dbConfigured) {
+          if (sessionStorage.getItem("avt_auth") === "1") setAuthed(true);
+          if (localStorage.getItem("avt_tier1") === "1") setPassed1(true);
+          if (localStorage.getItem("avt_tier2") === "1") setPassed2(true);
+        }
+      } catch {
+        if (!cancelled) setDbMode(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  function passTier1() {
-    localStorage.setItem("avt_tier1", "1");
-    setPassed1(true);
+  // Persist a passed tier to the student's record when logged in; local otherwise.
+  async function recordTier(tier: "tier1" | "tier2") {
+    if (dbMode && username) {
+      try {
+        await fetch("/api/me", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tier }),
+        });
+      } catch { /* progress still unlocks locally this session */ }
+    } else {
+      localStorage.setItem(tier === "tier1" ? "avt_tier1" : "avt_tier2", "1");
+    }
   }
-  function passTier2() {
-    localStorage.setItem("avt_tier2", "1");
-    setPassed2(true);
+
+  function passTier1() { setPassed1(true); void recordTier("tier1"); }
+  function passTier2() { setPassed2(true); void recordTier("tier2"); }
+
+  async function logout() {
+    await fetch("/api/me", { method: "DELETE" }).catch(() => {});
+    sessionStorage.removeItem("avt_auth");
+    location.reload();
   }
 
   const activeBelt = belts.find((b) => b.id === active)!;
@@ -46,14 +87,40 @@ export default function PaidPage() {
     (b.tier === "intermediate" && !passed1) || (b.tier === "advanced" && !passed2);
   const activeLocked = beltLocked(activeBelt);
 
-  function checkPassword() {
-    if (pw.trim().toUpperCase() === CORRECT_PASSWORD) {
-      sessionStorage.setItem("avt_auth", "1");
-      setAuthed(true);
-    } else {
-      setErr(true);
-      setPw("");
+  async function signIn() {
+    setErr("");
+    // Legacy mode: shared password only, until the database is provisioned.
+    if (dbMode === false) {
+      if (pw.trim().toUpperCase() === CORRECT_PASSWORD) {
+        sessionStorage.setItem("avt_auth", "1");
+        setAuthed(true);
+      } else {
+        setErr("Incorrect password. Check your confirmation email.");
+        setPw("");
+      }
+      return;
     }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password: pw }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAuthed(true);
+        setUsername(data.student.username);
+        setPassed1(Boolean(data.student.tier1_passed));
+        setPassed2(Boolean(data.student.tier2_passed));
+      } else {
+        setErr(data.error || "Incorrect username or password.");
+        setPw("");
+      }
+    } catch {
+      setErr("Network error — please try again.");
+    }
+    setBusy(false);
   }
 
   return (
@@ -66,18 +133,37 @@ export default function PaidPage() {
           <div className="pd-gate-box">
             <span className="pd-gate-tri">▲</span>
             <p className="pd-gate-title">AVT Student Portal</p>
-            <p className="pd-gate-sub">Enter your access password to continue</p>
+            <p className="pd-gate-sub">
+              {dbMode === false
+                ? "Enter your access password to continue"
+                : "Sign in with the credentials from your purchase"}
+            </p>
+            {dbMode !== false && (
+              <input
+                type="text"
+                className="pd-gate-input"
+                placeholder="USERNAME"
+                autoCapitalize="none"
+                autoCorrect="off"
+                value={user}
+                onChange={e => { setUser(e.target.value); setErr(""); }}
+                onKeyDown={e => e.key === "Enter" && signIn()}
+                autoFocus
+              />
+            )}
             <input
               type="password"
               className="pd-gate-input"
               placeholder="PASSWORD"
               value={pw}
-              onChange={e => { setPw(e.target.value); setErr(false); }}
-              onKeyDown={e => e.key === "Enter" && checkPassword()}
-              autoFocus
+              onChange={e => { setPw(e.target.value); setErr(""); }}
+              onKeyDown={e => e.key === "Enter" && signIn()}
+              autoFocus={dbMode === false}
             />
-            <button className="pd-gate-btn" onClick={checkPassword}>Enter the Dojo →</button>
-            {err && <p className="pd-gate-error">Incorrect password. Check your confirmation email.</p>}
+            <button className="pd-gate-btn" onClick={signIn} disabled={busy}>
+              {busy ? "Signing in…" : "Enter the Dojo →"}
+            </button>
+            {err && <p className="pd-gate-error">{err}</p>}
             <p className="pd-gate-footer">Not a student yet? <Link href="/course">Enroll here →</Link></p>
           </div>
         </div>
@@ -87,8 +173,10 @@ export default function PaidPage() {
       <nav className="pd-nav">
         <Link href="/" className="pd-nav-logo">▲ AVT — Ace&apos;s Dojo</Link>
         <div className="pd-nav-right">
-          <span className="pd-nav-badge">AVT Student</span>
-          <Link href="/" className="pd-nav-ghost">← Home</Link>
+          <span className="pd-nav-badge">{username ?? "AVT Student"}</span>
+          {username
+            ? <button className="pd-nav-ghost pd-logout" onClick={logout}>Log out</button>
+            : <Link href="/" className="pd-nav-ghost">← Home</Link>}
         </div>
       </nav>
 
@@ -592,6 +680,7 @@ const css = `
   .pd-tab-active { color:var(--pd-white); background:var(--pd-surface); border-color:var(--pd-border); border-bottom-color:var(--pd-surface); }
   .pd-tab-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
   .pd-tab-locked { opacity:0.55; }
+  .pd-logout { background:none; border:none; cursor:pointer; font-family:inherit; padding:0; }
   .pd-tab-lock { font-size:9px; margin-left:2px; }
   .pd-tier-div { width:1px; align-self:center; height:16px; background:var(--pd-border-b); margin:0 6px; flex-shrink:0; }
   .pd-gate-test { padding:1.75rem 1.25rem; animation:pdFadeUp 0.3s ease both; }

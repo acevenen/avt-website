@@ -25,15 +25,38 @@ type Plan = "course" | "trade" | "coach";
 const faqs = [
   { q: "Do I need experience to start?", a: "No. White through Orange belts are free and assume zero knowledge — mindset, the rules, and how to read a chart. The paid course picks up where they leave off." },
   { q: "What do I actually trade?", a: "NQ futures, during the New York open (9:30–11:30 AM EST). One instrument, one window. You master one market instead of jumping between assets." },
-  { q: "Signals, the bot, or the course — which is for me?", a: "The Course if you want to learn the system yourself. Signals or Autopilot if you'd rather trade alongside me while you learn. Black Belt if you want it built around you 1-on-1." },
-  { q: "Is the bot fully automated?", a: "Autopilot executes the AVT system for you with fixed stops and a daily circuit breaker built in. You set it up once with the onboarding guide." },
-  { q: "What's the refund / cancel policy?", a: "Signals and Autopilot are month-to-month — cancel anytime. The Course is a one-time purchase with lifetime portal access. Black Belt is application-reviewed before you pay." },
+  { q: "Signals, the bot, or the course — which is for me?", a: "The Course if you want to learn the system yourself, at your own pace. Black Belt if you want it rebuilt around you 1-on-1. Signals and Autopilot are being rebuilt right now and aren't on sale — the Course and Coaching are." },
+  { q: "Is the bot available yet?", a: "Not yet — Autopilot is paused while the execution engine is rebuilt. When it ships it runs the AVT system with fixed stops and a daily circuit breaker built in. Course buyers get first access." },
+  { q: "How does access work after I buy?", a: "The moment your payment clears you get a private username and password for the student portal — unique to you, shown once on the confirmation screen. The Course is one-time with lifetime access; Black Belt includes the full course plus 3 months 1-on-1." },
 ];
 
 export default function Home() {
   const [plan, setPlan] = useState<Plan>("course");
   const [openBelt, setOpenBelt] = useState<number | null>(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [buying, setBuying] = useState<string | null>(null);
+  const [buyError, setBuyError] = useState("");
+
+  async function buy(product: "course" | "coaching") {
+    setBuying(product);
+    setBuyError("");
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product }),
+      });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url; // hand off to Stripe
+        return;
+      }
+      setBuyError(data.error || "Could not start checkout.");
+    } catch {
+      setBuyError("Network error — please try again.");
+    }
+    setBuying(null);
+  }
 
   return (
     <div className="av">
@@ -117,7 +140,10 @@ export default function Home() {
               <li>Funded-account gameplan — Topstep & Lucid</li>
               <li>Lifetime access to the student portal</li>
             </ul>
-            <a href={checkoutUrl("course")} className="btn btn-gold btn-block">Get the Course</a>
+            <button className="btn btn-gold btn-block" onClick={() => buy("course")} disabled={buying === "course"}>
+              {buying === "course" ? "Redirecting…" : "Get the Course — $297"}
+            </button>
+            {buyError && plan === "course" && <p className="av-buy-err">{buyError}</p>}
             <p className="av-fine">White → Orange are <strong>free forever</strong> — <Link href="/learn">start there</Link> first.</p>
           </div>
         )}
@@ -168,8 +194,13 @@ export default function Home() {
               <li>Your trading rebuilt around your goals</li>
               <li>Focused on passing your first funded account</li>
             </ul>
-            <Link href="/apply" className="btn btn-gold btn-block">Apply for Black Belt</Link>
-            <p className="av-fine">Reviewed, not first-come. No ghosting. No upsells.</p>
+            <button className="btn btn-gold btn-block" onClick={() => buy("coaching")} disabled={buying === "coaching"}>
+              {buying === "coaching" ? "Redirecting…" : "Claim your seat — $1,000"}
+            </button>
+            {buyError && plan === "coach" && <p className="av-buy-err">{buyError}</p>}
+            <p className="av-fine">
+              Prefer to talk first? <Link href="/apply">Apply and Ace will reach out</Link> — no payment up front.
+            </p>
           </div>
         )}
       </section>
@@ -266,7 +297,9 @@ export default function Home() {
       {/* STICKY MOBILE CTA */}
       <div className="av-sticky">
         <Link href="/learn" className="btn btn-ghost av-sticky-ghost">Free</Link>
-        <a href={checkoutUrl("course")} className="btn btn-gold av-sticky-main">Get the Course — $297</a>
+        <button className="btn btn-gold av-sticky-main" onClick={() => buy("course")} disabled={buying === "course"}>
+          {buying === "course" ? "Redirecting…" : "Get the Course — $297"}
+        </button>
       </div>
     </div>
   );
@@ -320,6 +353,7 @@ const css = `
   .btn-ghost { background: rgba(255,255,255,0.04); color: var(--paper); border: 1px solid var(--edge); }
   .btn-ghost:hover { border-color: rgba(232,184,75,.5); transform: translateY(-2px); }
   .btn-block { display: flex; width: 100%; }
+  .av-buy-err { margin-top: 10px; font-size: .78rem; color: #e0a0a0; text-align: center; }
   .btn-disabled { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px dashed var(--edge); cursor: not-allowed; font-family: inherit; }
   .av-panel-soon .av-duo-col { opacity: .62; }
   .av-soon-banner { font-size: .78rem; line-height: 1.6; color: var(--muted); background: rgba(255,255,255,0.03);
