@@ -123,7 +123,11 @@ export default function Home() {
         )}
 
         {plan === "trade" && (
-          <div className="av-panel">
+          <div className="av-panel av-panel-soon">
+            <div className="av-soon-banner">
+              🔧 Signals &amp; Autopilot are being rebuilt — not for sale yet.{" "}
+              <Link href="/learn">Start free</Link> or grab the Course meanwhile.
+            </div>
             <div className="av-duo">
               <div className="av-duo-col">
                 <div className="av-panel-name">Signals</div>
@@ -133,7 +137,9 @@ export default function Home() {
                   <li>Context on every call — the why</li>
                   <li>Cancel anytime</li>
                 </ul>
-                <a href={checkoutUrl("signals")} className="btn btn-gold btn-block">Start Signals</a>
+                <button className="btn btn-disabled btn-block" disabled aria-disabled="true">
+                  Coming soon
+                </button>
               </div>
               <div className="av-duo-col">
                 <div className="av-panel-name">Autopilot <span className="av-tag-bot">BOT</span></div>
@@ -143,7 +149,9 @@ export default function Home() {
                   <li>Fixed stops + daily circuit breaker</li>
                   <li>Volume-adaptive trailing</li>
                 </ul>
-                <a href={checkoutUrl("autopilot")} className="btn btn-ghost btn-block">Get Autopilot</a>
+                <button className="btn btn-disabled btn-block" disabled aria-disabled="true">
+                  Coming soon
+                </button>
               </div>
             </div>
           </div>
@@ -312,6 +320,11 @@ const css = `
   .btn-ghost { background: rgba(255,255,255,0.04); color: var(--paper); border: 1px solid var(--edge); }
   .btn-ghost:hover { border-color: rgba(232,184,75,.5); transform: translateY(-2px); }
   .btn-block { display: flex; width: 100%; }
+  .btn-disabled { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px dashed var(--edge); cursor: not-allowed; font-family: inherit; }
+  .av-panel-soon .av-duo-col { opacity: .62; }
+  .av-soon-banner { font-size: .78rem; line-height: 1.6; color: var(--muted); background: rgba(255,255,255,0.03);
+    border: 1px dashed var(--edge); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; text-align: center; }
+  .av-soon-banner a { color: var(--gold); text-decoration: none; font-weight: 600; }
 
   /* nav */
   .av-nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;

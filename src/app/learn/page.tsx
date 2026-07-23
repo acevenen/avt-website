@@ -151,10 +151,20 @@ function PillarModule({ pillar }: { pillar: (typeof pillars)[0] }) {
           {beltVideos[pillar.beltId]?.youTubeId ? (
             <div className="l-video-embed">
               <iframe
-                src={embedUrl(beltVideos[pillar.beltId].youTubeId)}
+                src={embedUrl(beltVideos[pillar.beltId].youTubeId!)}
                 title={beltVideos[pillar.beltId].label}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
+              />
+            </div>
+          ) : beltVideos[pillar.beltId]?.src ? (
+            <div className="l-video-embed">
+              <video
+                src={beltVideos[pillar.beltId].src}
+                controls
+                preload="metadata"
+                playsInline
+                title={beltVideos[pillar.beltId].label}
               />
             </div>
           ) : (
@@ -415,7 +425,7 @@ const css = `
   .l-play::after { content: ''; width: 0; height: 0; border-style: solid; border-width: 8px 0 8px 14px; border-color: transparent transparent transparent var(--lv-green); margin-left: 3px; }
   .l-video-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--lv-muted); letter-spacing: 0.1em; text-transform: uppercase; position: relative; z-index: 1; text-align: center; padding: 0 1rem; }
   .l-video-embed { margin-bottom: 1.25rem; border-radius: 10px; overflow: hidden; aspect-ratio: 16/9; }
-  .l-video-embed iframe { width: 100%; height: 100%; border: none; }
+  .l-video-embed iframe, .l-video-embed video { width: 100%; height: 100%; border: none; object-fit: contain; background: #000; display: block; }
 
   /* CONTENT PIECES */
   .l-intro { font-size: 13px; color: var(--lv-muted2); line-height: 1.7; margin-bottom: 1.25rem; font-weight: 400; }

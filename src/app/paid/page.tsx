@@ -170,6 +170,13 @@ function VideoBlock({ beltId }: { beltId: string }) {
       </div>
     );
   }
+  if (v?.src) {
+    return (
+      <div className="pd-video-embed">
+        <video src={v.src} controls preload="metadata" playsInline title={v.label} />
+      </div>
+    );
+  }
   return (
     <div className="pd-video">
       <div className="pd-play" />
@@ -590,7 +597,7 @@ const css = `
   .pd-gate-test { padding:1.75rem 1.25rem; animation:pdFadeUp 0.3s ease both; }
   .pd-gate-test-note { max-width:640px; margin:0 auto 1.5rem; text-align:center; font-size:12px; color:var(--pd-muted2); line-height:1.6; background:var(--pd-surface2); border:0.5px solid var(--pd-border); border-radius:10px; padding:12px 16px; }
   .pd-video-embed { position:relative; width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden; border:0.5px solid var(--pd-border-b); margin-bottom:1.5rem; background:#000; }
-  .pd-video-embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .pd-video-embed iframe, .pd-video-embed video { position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; background:#000; }
   /* CONTENT */
   .pd-content { animation:pdFadeUp 0.3s ease both; }
   .pd-module { padding:1.5rem 1.25rem; }
