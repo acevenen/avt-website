@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       product: student.product,
       tier1_passed: student.tier1_passed,
       tier2_passed: student.tier2_passed,
+      is_admin: student.is_admin,
     },
   });
   res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());

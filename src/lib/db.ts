@@ -30,9 +30,12 @@ export async function ensureSchema(): Promise<void> {
       belt_level        TEXT NOT NULL DEFAULT 'beginner',
       tier1_passed      BOOLEAN NOT NULL DEFAULT FALSE,
       tier2_passed      BOOLEAN NOT NULL DEFAULT FALSE,
+      is_admin          BOOLEAN NOT NULL DEFAULT FALSE,
       created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       last_login_at     TIMESTAMPTZ
     )`;
+  // Additive migration for DBs created before is_admin existed.
+  await q`ALTER TABLE students ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE`;
   await q`
     CREATE TABLE IF NOT EXISTS sessions (
       token_hash TEXT PRIMARY KEY,
@@ -55,4 +58,7 @@ export interface Student {
   belt_level: string;
   tier1_passed: boolean;
   tier2_passed: boolean;
+  is_admin: boolean;
+  created_at?: string;
+  last_login_at?: string | null;
 }

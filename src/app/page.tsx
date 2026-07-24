@@ -237,22 +237,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PROOF — horizontal receipts */}
-      <section className="av-proof">
-        <p className="av-eyebrow">Receipts · screenshots · payouts</p>
-        <div className="av-proof-row">
-          {results.map((r) => (
-            <div key={r.amount} className="av-proof-card">
-              <div className="av-proof-shot"><span>P&amp;L</span></div>
-              <div className="av-proof-amt">{r.amount}</div>
-              <div className="av-proof-name">{r.name}</div>
-              <div className="av-proof-detail">{r.detail}</div>
-            </div>
-          ))}
-        </div>
-        <p className="av-proof-note">Individual results vary. Screenshots are placeholders — real receipts drop in here.</p>
-      </section>
-
       {/* FAQ accordion */}
       <section className="av-faq">
         <h2 className="av-h2">Questions?</h2>
@@ -311,12 +295,6 @@ const tickerItems = [
   { amt: "+$3,037", who: "Topstep $50K passed" },
   { amt: "+$300/day", who: "Emilio · 1 session" },
   { amt: "+$2,140", who: "Tuesday open" },
-];
-
-const results = [
-  { amount: "+$18,686", name: "Chris — 15 days, part-time", detail: "Topstep combine, full-time job" },
-  { amount: "+$1,510", name: "Tuesday session — NQ scalp", detail: "4 trades, 62 minutes" },
-  { amount: "+$3,037", name: "April combine", detail: "Passed Topstep $50K" },
 ];
 
 function GrainGlow() {
@@ -390,7 +368,7 @@ const css = `
   .av-tick-dot { color: var(--gold); opacity: .4; }
 
   /* section shells */
-  .av-pricing, .av-curriculum, .av-proof, .av-faq, .av-final { max-width: 680px; margin: 0 auto; padding: 40px 22px; }
+  .av-pricing, .av-curriculum, .av-faq, .av-final { max-width: 680px; margin: 0 auto; padding: 40px 22px; }
 
   /* segmented control */
   .av-seg { position: relative; display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; background: rgba(255,255,255,0.03);
@@ -444,15 +422,6 @@ const css = `
   .av-belt-link { font-size: .8rem; font-weight: 600; color: var(--gold); text-decoration: none; }
 
   /* proof */
-  .av-proof-row { display: flex; gap: 12px; overflow-x: auto; padding: 6px 0 12px; scroll-snap-type: x mandatory; scrollbar-width: none; }
-  .av-proof-row::-webkit-scrollbar { display: none; }
-  .av-proof-card { flex: 0 0 210px; scroll-snap-align: start; border: 1px solid var(--edge); border-radius: 14px; padding: 14px; background: rgba(255,255,255,0.02); }
-  .av-proof-shot { border: 1.5px dashed rgba(255,255,255,.14); border-radius: 8px; padding: 26px; text-align: center; margin-bottom: 12px; }
-  .av-proof-shot span { font-size: .62rem; letter-spacing: .18em; color: rgba(255,255,255,.22); }
-  .av-proof-amt { font-size: 1.5rem; font-weight: 800; color: #1db87e; }
-  .av-proof-name { font-size: .82rem; font-weight: 600; margin-top: 2px; }
-  .av-proof-detail { font-size: .74rem; color: var(--muted); }
-  .av-proof-note { font-size: .68rem; color: var(--muted); margin-top: 8px; }
 
   /* faq */
   .av-faq-list { display: flex; flex-direction: column; gap: 8px; }

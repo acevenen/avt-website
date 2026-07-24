@@ -91,9 +91,35 @@ Then swap both Stripe keys to **live** values and redeploy.
   login boots whoever was already using it. That's the anti-sharing lever.
 - Belt tier tests write to the student's record, so progress follows the account.
 
-### Seeing your students
+### Seeing your students — the admin dashboard
 
-In the Neon dashboard → SQL editor:
+There's a built-in dashboard at **`/admin`** — every student, their belt level,
+which tier tests they've passed, and whether they've claimed their account yet.
+
+**One-time setup (do this once, from your own browser — never share the key):**
+
+1. Generate a long random secret. Anything unguessable works — e.g. run
+   `openssl rand -hex 32` in a terminal, or just mash the keyboard for 40+
+   characters.
+2. In Vercel → Settings → Environment Variables, add `ADMIN_SETUP_KEY` with
+   that value. Redeploy.
+3. Open your browser's dev console on the live site (F12 → Console tab) and run:
+   ```js
+   fetch("/api/admin/bootstrap", {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify({ key: "PASTE_YOUR_ADMIN_SETUP_KEY", username: "ace" }),
+   }).then(r => r.json()).then(console.log)
+   ```
+4. It prints `{ username, password }` **once** — write the password down
+   immediately, it is never shown or stored again (same as student credentials).
+5. Go to `/admin` and log in with that username/password.
+
+Running step 3 again with the same key **resets** that admin's password —
+handy if you lose it. Nobody else can do this without your `ADMIN_SETUP_KEY`,
+which only exists in Vercel and whatever you just wrote it down on.
+
+Prefer raw SQL? The same data, in the Neon dashboard → SQL editor:
 
 ```sql
 select username, email, product, belt_level, tier1_passed, tier2_passed,

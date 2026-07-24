@@ -21,6 +21,7 @@ export async function GET() {
       tier1_passed: s.tier1_passed,
       tier2_passed: s.tier2_passed,
       belt_level: s.belt_level,
+      is_admin: s.is_admin,
     },
   });
 }
